@@ -20,9 +20,15 @@ importers:
       '@mui/material':
         specifier: ^9.1.1
         version: 9.4.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@18.3.1))(@types/react@19.2.18)(react@18.3.1))(@types/react@19.2.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@spglib/moyo-wasm':
+        specifier: 0.17.0
+        version: 0.17.0
       '@tanstack/react-query':
         specifier: ^5.90.19
         version: 5.102.8(react@18.3.1)
+      brillouinzone-visualizer:
+        specifier: 0.4.4
+        version: 0.4.4
       framer-motion:
         specifier: ^12.23.19
         version: 12.43.0(@emotion/is-prop-valid@1.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -33,11 +39,8 @@ importers:
         specifier: ^4.0.8
         version: 4.0.8
       matsci-parse:
-        specifier: 0.8.4
-        version: 0.8.4
-      mc-periodic-table:
-        specifier: ^0.0.4
-        version: 0.0.4
+        specifier: 0.13.0
+        version: 0.13.0
       mc-react-header:
         specifier: ^0.5.3
         version: 0.5.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -575,6 +578,9 @@ packages:
     os: [linux]
     libc: [glibc]
 
+  '@nodable/entities@3.0.0':
+    resolution: {integrity: sha512-8L9xFeTYKhm49xfIypoe2W5wV1m/3Z58kT+7kR9A8OyFxcPduI4VmxaUMQyKYrRjUoLLSXv6EKKID5Tvj9cUVw==}
+
   '@popperjs/core@2.11.8':
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
 
@@ -747,8 +753,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@spglib/moyo-wasm@0.7.9':
-    resolution: {integrity: sha512-OTutVoqRkInR+ZrBuwS3z/yolCRsNGEMm87tz822NxiajGmXnU+7L9bVlqHCPck7+CeCCR3H60Mzr94W20vu6w==}
+  '@spglib/moyo-wasm@0.17.0':
+    resolution: {integrity: sha512-4tb7iiH8qrT5oqRtj7OXLRSCoGykMEomu5dKbnEqbG3nI5w8QrFq4iTj8pY70XRSEUFgA5CZi73RtYrhiEMDaQ==}
 
   '@swc/helpers@0.5.23':
     resolution: {integrity: sha512-5lSsMOTXURePglDfvuAQUqkGek9Hg2kksOYay2m0+XR++b2NWYL/4sWyuvVBIs8oKnJaxkdi9whaL/sqN13afw==}
@@ -926,6 +932,9 @@ packages:
     resolution: {integrity: sha512-4Dj6M28JB+oAH8kFkTLUo+a2jwOFkuqb3yucU0CANcRRUbxS0cP0nZYCGjcc3BNXwRIsUVmDGgzawme7zvJHvg==}
     engines: {node: '>=12'}
 
+  anynum@1.0.1:
+    resolution: {integrity: sha512-N6//FLET/tXYNM/F6ABca1oH6fWB+KlTt909Le28WMDBk8oaT4vY17DCrwg2MvmuqUKt3Ni4N5dGJ/EoBgcO6A==}
+
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
 
@@ -991,6 +1000,9 @@ packages:
 
   brace-expansion@1.1.18:
     resolution: {integrity: sha512-Edep/X9fGqVNmzKBVsDYIOtD+z1tuezV70LBjdCst9Tqu76lsnvRiZ6oTic1n+/BIwX6QDGAO94PN4N2SADvtw==}
+
+  brillouinzone-visualizer@0.4.4:
+    resolution: {integrity: sha512-a7jTXivF5UPhE26+K8+c4d4+2WnpU9hPpZCs7UHkd21gG/vJPVPoN59IzTalkcxPGALN3Eg76B4yh9IYMlCOoQ==}
 
   browserslist@4.28.8:
     resolution: {integrity: sha512-V2NpofLblG64mfOtSgDhOJESZEGogzDMBv/q+W6oc4LXWP/q75eOXoOaaOu1EOadB9U4Bwx/e0yzbvwKH8zalA==}
@@ -1267,6 +1279,13 @@ packages:
   fast-levenshtein@2.0.6:
     resolution: {integrity: sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==}
 
+  fast-xml-builder@1.3.1:
+    resolution: {integrity: sha512-pIM/1n3ntFXKYrUZwW7QCK0gAW7XY+wzj1YMIV3tLDvPj/V+zTGJK5e3/4WJfwj0qWw2ElNXiTixda/R+3YSug==}
+
+  fast-xml-parser@5.11.1:
+    resolution: {integrity: sha512-TBw6K/fxoQGGjCmZDw9w/ZwP3uDcnTM4YH/g+PFRWr8sbe5idXtxNN6vITh4+1ruCZaho6uBFurElsA7F0zzgw==}
+    hasBin: true
+
   fdir@6.5.0:
     resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
     engines: {node: '>=12.0.0'}
@@ -1537,6 +1556,9 @@ packages:
     resolution: {integrity: sha512-p3EcsicXjit7SaskXHs1hA91QxgTw46Fv6EFKKGS5DRFLD8yKnohjF3hxoju94b/OcMZoQukzpPpBE9uLVKzgQ==}
     engines: {node: '>= 0.4'}
 
+  is-unsafe@2.0.2:
+    resolution: {integrity: sha512-HgbIHPBH0KHHCcjLfGsCvhtPTVxjaAZlXjwdz7/GQC40SjSe4sfQsar8J5VFo8JOSbarkpV0OLG95bbaNd9aAQ==}
+
   is-weakmap@2.0.2:
     resolution: {integrity: sha512-K5pXYOm9wqY1RgjpL3YTkF39tni1XajUIkawTLUo9EZEVUFga5gSQJF8nNS7ZwJQ02y+1YCNYcMh+HIf1ZqE+w==}
     engines: {node: '>= 0.4'}
@@ -1716,11 +1738,8 @@ packages:
     engines: {node: '>= 18'}
     hasBin: true
 
-  matsci-parse@0.8.4:
-    resolution: {integrity: sha512-mQ2KF8XEfHPJWfJoF2I3O7QRUHZs/Q4Gzz9D5tahqeXVCauiiSh1VgCMi6SzXI1dyS7k2nyb0v2/0v7VPZZhWw==}
-
-  mc-periodic-table@0.0.4:
-    resolution: {integrity: sha512-he4yo8Px4aM6aRgxYjsBpxVmcN+Tp4YBza4O4X8LeDr+KQ/YC8PstS7Be8VrhNnmndipvrcnwvldNSZzQSSaCg==}
+  matsci-parse@0.13.0:
+    resolution: {integrity: sha512-B3EbCYj4wHXLGvckZl+DQIcmdADvpNYYbEnux2MVqOOuw/P2yTQLyZmbmNqIqUZNjsY1niqo4ber3ecefTE4vQ==}
 
   mc-react-header@0.5.3:
     resolution: {integrity: sha512-P/HoGUm9l7S/b9aW/bkVgCS55BcYz2ZfDNLmMLfyZKYy46XYC64pDkWji+pHOCNr3h5deHmfjgjV5AlwT0+f4g==}
@@ -1839,6 +1858,10 @@ packages:
   path-exists@4.0.0:
     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
     engines: {node: '>=8'}
+
+  path-expression-matcher@1.6.2:
+    resolution: {integrity: sha512-enSlaiat05iasnzmgNxRj8reFdj3puY2QpNgP1aPIaVfT6nn9ICuPoFlKHk8EN22HcwewshO+mN2DGbkCEOtqQ==}
+    engines: {node: '>=14.0.0'}
 
   path-key@3.1.1:
     resolution: {integrity: sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==}
@@ -2127,6 +2150,9 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
 
+  strnum@2.4.2:
+    resolution: {integrity: sha512-rDG3Ah4TV0k1hWvLSzkZtMmLN9+eS+h3knq4MP6A42Y3Yh5qGNnOUs1jJkoSr8FG5dsL28c7KgkIBzSEykqtuw==}
+
   stylis@4.2.0:
     resolution: {integrity: sha512-Orov6g6BB1sDfYgzWfTHDOxamtX1bE/zo104Dh9e6fqJ3PooipYyfJ0pUmrZO2wAvO8YbEyeFrkV91XTsGMSrw==}
 
@@ -2144,6 +2170,9 @@ packages:
   tapable@2.3.3:
     resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
     engines: {node: '>=6'}
+
+  three@0.180.0:
+    resolution: {integrity: sha512-o+qycAMZrh+TsE01GqWUxUIKR1AL0S8pq7zDkYOQw8GqfX8b8VoCKYUoHbhiX5j+7hr8XsuHDVU6+gkQJQKg9w==}
 
   tiny-emitter@2.1.0:
     resolution: {integrity: sha512-NB6Dk1A9xgQPMoGqC5CVXn123gWyte215ONT5Pp5a0yt4nlEoO1ZWeCwpncaekPHXO60i47ihFnZPiRPjRMq4Q==}
@@ -2288,6 +2317,10 @@ packages:
   wsl-utils@1.0.0:
     resolution: {integrity: sha512-Hl0ZOAs672vg+06kfujwRhoS6/jehvULrlFkuF2dRu6pHgA8U06h3xqNIqNNU1LTXPcedxByAR4GS6pwQK0mgA==}
     engines: {node: '>=20'}
+
+  xml-naming@0.3.0:
+    resolution: {integrity: sha512-ghig2TBE/H11aOVgmahA3MhimvkBr6JIYknH/Dhdk10nXwdbIqBJsbfMxpvFPG8bAw77gN29aQWvKpmVoPlvPQ==}
+    engines: {node: '>=16.0.0'}
 
   y18n@5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
@@ -2781,6 +2814,8 @@ snapshots:
   '@napi-rs/lzma-linux-x64-gnu@1.5.1':
     optional: true
 
+  '@nodable/entities@3.0.0': {}
+
   '@popperjs/core@2.11.8': {}
 
   '@react-aria/ssr@3.10.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
@@ -2895,7 +2930,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.63.1':
     optional: true
 
-  '@spglib/moyo-wasm@0.7.9': {}
+  '@spglib/moyo-wasm@0.17.0': {}
 
   '@swc/helpers@0.5.23':
     dependencies:
@@ -3052,6 +3087,8 @@ snapshots:
 
   ansi-styles@6.2.3: {}
 
+  anynum@1.0.1: {}
+
   argparse@2.0.1: {}
 
   aria-hidden@1.2.6:
@@ -3141,6 +3178,10 @@ snapshots:
     dependencies:
       balanced-match: 1.0.2
       concat-map: 0.0.1
+
+  brillouinzone-visualizer@0.4.4:
+    dependencies:
+      three: 0.180.0
 
   browserslist@4.28.8:
     dependencies:
@@ -3549,6 +3590,20 @@ snapshots:
 
   fast-levenshtein@2.0.6: {}
 
+  fast-xml-builder@1.3.1:
+    dependencies:
+      path-expression-matcher: 1.6.2
+      xml-naming: 0.3.0
+
+  fast-xml-parser@5.11.1:
+    dependencies:
+      '@nodable/entities': 3.0.0
+      fast-xml-builder: 1.3.1
+      is-unsafe: 2.0.2
+      path-expression-matcher: 1.6.2
+      strnum: 2.4.2
+      xml-naming: 0.3.0
+
   fdir@6.5.0(picomatch@4.0.7):
     optionalDependencies:
       picomatch: 4.0.7
@@ -3811,6 +3866,8 @@ snapshots:
     dependencies:
       which-typed-array: 1.1.22
 
+  is-unsafe@2.0.2: {}
+
   is-weakmap@2.0.2: {}
 
   is-weakref@1.1.1:
@@ -3962,12 +4019,11 @@ snapshots:
       tiny-emitter: 2.1.0
       typed-function: 4.2.2
 
-  matsci-parse@0.8.4:
+  matsci-parse@0.13.0:
     dependencies:
-      '@spglib/moyo-wasm': 0.7.9
+      '@spglib/moyo-wasm': 0.17.0
+      fast-xml-parser: 5.11.1
       voro3d: 0.0.7
-
-  mc-periodic-table@0.0.4: {}
 
   mc-react-header@0.5.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
@@ -4103,6 +4159,8 @@ snapshots:
       lines-and-columns: 1.2.4
 
   path-exists@4.0.0: {}
+
+  path-expression-matcher@1.6.2: {}
 
   path-key@3.1.1: {}
 
@@ -4479,6 +4537,10 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
+  strnum@2.4.2:
+    dependencies:
+      anynum: 1.0.1
+
   stylis@4.2.0: {}
 
   supports-color@7.2.0:
@@ -4490,6 +4552,8 @@ snapshots:
   tailwindcss@4.3.3: {}
 
   tapable@2.3.3: {}
+
+  three@0.180.0: {}
 
   tiny-emitter@2.1.0: {}
 
@@ -4652,6 +4716,8 @@ snapshots:
     dependencies:
       is-wsl: 3.1.1
       powershell-utils: 0.1.0
+
+  xml-naming@0.3.0: {}
 
   y18n@5.0.8: {}
 

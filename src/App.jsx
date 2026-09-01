@@ -3,6 +3,7 @@ import MaterialsCloudHeader from "mc-react-header";
 import { useState } from "react";
 
 import CrystalUpload from "./FileUpload";
+import SeekPath from "./SeekPath";
 
 function Accordion({ title, children, className = "", open, onToggle }) {
   return (
@@ -57,6 +58,11 @@ function Accordion({ title, children, className = "", open, onToggle }) {
 
 function App() {
   const [openAccordion, setOpenAccordion] = useState(null);
+  const [loaded, setLoaded] = useState(null);
+
+  const handleStructureParsed = ({ structure, fileName }) => {
+    setLoaded({ structure, fileName });
+  };
 
   return (
     <>
@@ -204,7 +210,21 @@ function App() {
                   </ul>
                   <p></p>
                 </Accordion>
-                <CrystalUpload />
+                <CrystalUpload onStructureParsed={handleStructureParsed} />
+
+                <Accordion
+                  title={
+                    loaded
+                      ? `Brillouin zone and k-path (${loaded.fileName})`
+                      : "Brillouin zone and k-path"
+                  }
+                  open={openAccordion === 2}
+                  onToggle={() =>
+                    setOpenAccordion(openAccordion === 2 ? null : 2)
+                  }
+                >
+                  <SeekPath structure={loaded?.structure} />
+                </Accordion>
               </div>
             </div>
           </div>
