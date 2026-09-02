@@ -6,5 +6,6 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   optimizeDeps: {
     include: ["mc-react-header"],
+    exclude: ["@spglib/moyo-wasm"],
   },
 });
