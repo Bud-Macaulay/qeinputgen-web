@@ -1,9 +1,18 @@
 import { useState } from "react";
 import { CopyIcon, CheckIcon, DownloadIcon } from "../Icons";
 
-export default function TextRenderer({ title, text, filename = "text.txt" }) {
-  const [open, setOpen] = useState(true);
+export default function TextRenderer({
+  title,
+  text,
+  filename = "text.txt",
+  open: openProp,
+  onToggle,
+}) {
+  const [openInternal, setOpenInternal] = useState(true);
   const [copied, setCopied] = useState(false);
+
+  const open = openProp !== undefined ? openProp : openInternal;
+  const setOpen = onToggle ? onToggle : setOpenInternal;
 
   const handleCopy = async (e) => {
     e.stopPropagation();

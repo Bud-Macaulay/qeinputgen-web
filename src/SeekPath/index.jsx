@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createBZVisualizer } from "brillouinzone-visualizer";
 import StructureVisualizer from "mc-react-structure-visualizer";
-import { getBrillouinZoneData, kpointsToPW, toKPOINTS } from "matsci-parse";
+import { getBrillouinZoneData, toKPOINTS } from "matsci-parse";
 
-import { CheckIcon, CopyIcon, DownloadIcon } from "../components/Icons";
-import { formatSpaceGroupSymbol, prettify } from "../utils";
+import { formatSpaceGroupSymbol, preparePWText, prettify } from "../utils";
 
 import TextRenderer from "../components/TextRenderer";
 
@@ -13,47 +12,14 @@ const MIN_POINTS_PER_LINE = 2;
 const MAX_POINTS_PER_LINE = 100;
 const DEFAULT_POINTS_PER_LINE = 40;
 
-function totalToReferenceDistance(data, targetTotal) {
-  if (!data) return DEFAULT_REFERENCE_DISTANCE;
-  const linear = data.explicit_kpoints_linearcoord;
-  if (!linear || linear.length < 2) return DEFAULT_REFERENCE_DISTANCE;
-  const totalLength = linear[linear.length - 1];
-  return Math.max(1e-4, totalLength / Math.max(1, targetTotal - 1));
-}
-
-function estimatedKpointTotal(data, pointsPerLine) {
-  if (!data || data.path.length === 0) return 0;
-  return data.path.length * (pointsPerLine - 1) + 1;
-}
-
-function downloadFile(filename, content) {
-  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-async function copyText(text) {
-  if (navigator.clipboard && window.isSecureContext) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-  throw new Error("Clipboard not available");
-}
-
 export default function SeekPath({ structure, className = "" }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
   const [withTimeReversal, setWithTimeReversal] = useState(true);
-  const [referenceDistance, setReferenceDistance] = useState(
-    DEFAULT_REFERENCE_DISTANCE,
-  );
+  const [referenceDistance] = useState(DEFAULT_REFERENCE_DISTANCE);
   const [pointsPerLine, setPointsPerLine] = useState(DEFAULT_POINTS_PER_LINE);
-  const [copiedKey, setCopiedKey] = useState(null);
+  const [outputsOpen, setOutputsOpen] = useState({ vasp: true, pw: true });
 
   const containerRef = useRef(null);
 
@@ -108,29 +74,6 @@ export default function SeekPath({ structure, className = "" }) {
     compute(wtr, referenceDistance);
   };
 
-  const handleRecalculate = () => {
-    const refDist = totalToReferenceDistance(
-      data,
-      estimatedKpointTotal(data, pointsPerLine),
-    );
-    setReferenceDistance(refDist);
-    compute(withTimeReversal, refDist);
-  };
-
-  const handleDownload = (filename, serialize) => {
-    downloadFile(filename, serialize());
-  };
-
-  const handleCopy = async (key, text) => {
-    try {
-      await copyText(text);
-      setCopiedKey(key);
-      setTimeout(() => setCopiedKey(null), 1800);
-    } catch {
-      setCopiedKey(null);
-    }
-  };
-
   if (!structure) {
     return (
       <div className={`py-4 text-sm text-slate-500 ${className}`}>
@@ -143,13 +86,10 @@ export default function SeekPath({ structure, className = "" }) {
     ? data.path.map(([a, b]) => `${prettify(a)}\u2013${prettify(b)}`).join(", ")
     : "";
 
-  const proposedSpacing = totalToReferenceDistance(
-    data,
-    estimatedKpointTotal(data, pointsPerLine),
-  );
-
   const vaspKpointsText = data ? toKPOINTS(data.kpath, pointsPerLine) : "";
-  const pwKpointsText = data ? kpointsToPW(data.kpath, pointsPerLine) : "";
+  const pwInputText = data
+    ? preparePWText(structure, data.kpath, pointsPerLine)
+    : "";
 
   return (
     <div className={`space-y-3 ${className}`}>
@@ -228,12 +168,20 @@ export default function SeekPath({ structure, className = "" }) {
             title="KPOINTS (VASP)"
             text={vaspKpointsText}
             filename="KPOINTS"
+            open={outputsOpen.vasp}
+            onToggle={() =>
+              setOutputsOpen((prev) => ({ ...prev, vasp: !prev.vasp }))
+            }
           />
 
           <TextRenderer
             title="Quantum ESPRESSO pw.x input"
-            text={pwKpointsText}
-            filename="PW.in KPOINTS Block"
+            text={pwInputText}
+            filename="PW.in"
+            open={outputsOpen.pw}
+            onToggle={() =>
+              setOutputsOpen((prev) => ({ ...prev, pw: !prev.pw }))
+            }
           />
         </>
       )}
