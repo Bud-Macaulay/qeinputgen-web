@@ -1,42 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createBZVisualizer } from "brillouinzone-visualizer";
+import StructureVisualizer from "mc-react-structure-visualizer";
 import { getBrillouinZoneData, kpointsToPW, toKPOINTS } from "matsci-parse";
 
-const prettify = (label) =>
-  label
-    .replace(/GAMMA/g, "\u0393")
-    .replace(/SIGMA_0/g, "\u03A3")
-    .replace(/-/g, "\u2013")
-    .replace(/_/g, "\u2081");
+import { CheckIcon, CopyIcon, DownloadIcon } from "../components/Icons";
+import { formatSpaceGroupSymbol, prettify } from "../utils";
 
-function formatSpaceGroupSymbol(symbol) {
-  let nextIsSub = false;
-  let nextIsNegative = false;
-  return symbol.split("").map((v, index) => {
-    if (v === "-") {
-      nextIsNegative = true;
-      return null;
-    }
-    if (v === "_") {
-      nextIsSub = true;
-      return null;
-    }
-    if (nextIsNegative) {
-      nextIsNegative = false;
-      return (
-        <span className="relative inline-block" key={index}>
-          <span className="absolute inset-x-0 top-[0.15em] h-0 border-t-[0.1em] border-black" />
-          {v}
-        </span>
-      );
-    }
-    if (nextIsSub) {
-      nextIsSub = false;
-      return <sub key={index}>{v}</sub>;
-    }
-    return v;
-  });
-}
+import TextRenderer from "../components/TextRenderer";
 
 const DEFAULT_REFERENCE_DISTANCE = 0.025;
 const MIN_POINTS_PER_LINE = 2;
@@ -66,15 +36,24 @@ function downloadFile(filename, content) {
   URL.revokeObjectURL(url);
 }
 
+async function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  throw new Error("Clipboard not available");
+}
+
 export default function SeekPath({ structure, className = "" }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
   const [withTimeReversal, setWithTimeReversal] = useState(true);
   const [referenceDistance, setReferenceDistance] = useState(
-    DEFAULT_REFERENCE_DISTANCE
+    DEFAULT_REFERENCE_DISTANCE,
   );
   const [pointsPerLine, setPointsPerLine] = useState(DEFAULT_POINTS_PER_LINE);
+  const [copiedKey, setCopiedKey] = useState(null);
 
   const containerRef = useRef(null);
 
@@ -96,7 +75,7 @@ export default function SeekPath({ structure, className = "" }) {
         setLoading(false);
       }
     },
-    [structure]
+    [structure],
   );
 
   useEffect(() => {
@@ -113,7 +92,7 @@ export default function SeekPath({ structure, className = "" }) {
 
     const container = containerRef.current;
     const viz = createBZVisualizer(container, data, {
-      showPathpoints: true,
+      showPathpoints: false,
       disableInteractOverlay: true,
     });
 
@@ -132,7 +111,7 @@ export default function SeekPath({ structure, className = "" }) {
   const handleRecalculate = () => {
     const refDist = totalToReferenceDistance(
       data,
-      estimatedKpointTotal(data, pointsPerLine)
+      estimatedKpointTotal(data, pointsPerLine),
     );
     setReferenceDistance(refDist);
     compute(withTimeReversal, refDist);
@@ -140,6 +119,16 @@ export default function SeekPath({ structure, className = "" }) {
 
   const handleDownload = (filename, serialize) => {
     downloadFile(filename, serialize());
+  };
+
+  const handleCopy = async (key, text) => {
+    try {
+      await copyText(text);
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 1800);
+    } catch {
+      setCopiedKey(null);
+    }
   };
 
   if (!structure) {
@@ -156,16 +145,14 @@ export default function SeekPath({ structure, className = "" }) {
 
   const proposedSpacing = totalToReferenceDistance(
     data,
-    estimatedKpointTotal(data, pointsPerLine)
+    estimatedKpointTotal(data, pointsPerLine),
   );
+
+  const vaspKpointsText = data ? toKPOINTS(data.kpath, pointsPerLine) : "";
+  const pwKpointsText = data ? kpointsToPW(data.kpath, pointsPerLine) : "";
 
   return (
     <div className={`space-y-3 ${className}`}>
-      <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-slate-800">
-        This module calculates the primitive cell first. If you want to run a
-        new simulation with this path, use the primitive cell.
-      </div>
-
       {data && (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
           <span>
@@ -177,7 +164,8 @@ export default function SeekPath({ structure, className = "" }) {
           <span>
             <span className="text-slate-400">SG </span>
             <span className="font-mono">
-              {data.spacegroup_number} ({formatSpaceGroupSymbol(data.spacegroup_international)})
+              {data.spacegroup_number} (
+              {formatSpaceGroupSymbol(data.spacegroup_international)})
             </span>
           </span>
           <span>
@@ -207,42 +195,18 @@ export default function SeekPath({ structure, className = "" }) {
               </span>
             )}
           </span>
-          <div className="ml-auto flex gap-2">
-            <button
-              type="button"
-              onClick={() =>
-                handleDownload("KPOINTS", () =>
-                  toKPOINTS(data.kpath, pointsPerLine)
-                )
-              }
-              className="rounded-md bg-emerald-600 px-2.5 py-1 font-medium text-white transition hover:bg-emerald-700"
-            >
-              KPOINTS (VASP)
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                handleDownload("K_POINTS", () =>
-                  kpointsToPW(data.kpath, pointsPerLine)
-                )
-              }
-              className="rounded-md bg-emerald-600 px-2.5 py-1 font-medium text-white transition hover:bg-emerald-700"
-            >
-              K_POINTS (pw)
-            </button>
-          </div>
-        </div>
-      )}
 
-      {!withTimeReversal && data && !data.augmented_path && (
-        <div className="rounded border border-slate-200 bg-slate-50 px-1.5 py-1 text-xs text-slate-500">
-          Path unaffected by the time-reversal toggle: this structure has
-          inversion symmetry, so k and -k are already equivalent.
+          {!withTimeReversal && data && !data.augmented_path && (
+            <div className="rounded border border-slate-200 bg-slate-50 px-1.5 py-1 text-xs text-slate-500">
+              Path unaffected by the time-reversal toggle: this structure has
+              inversion symmetry, so k and -k are already equivalent.
+            </div>
+          )}
         </div>
       )}
 
       {data && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
+        <>
           <label className="flex select-none items-center gap-2">
             <span className="whitespace-nowrap text-slate-400">
               Points/line
@@ -260,40 +224,42 @@ export default function SeekPath({ structure, className = "" }) {
             />
             <span className="w-12 text-right font-mono">{pointsPerLine}</span>
           </label>
-          <span>
-            <span className="text-slate-400">~total </span>
-            <span className="font-mono">
-              {estimatedKpointTotal(data, pointsPerLine)}
-            </span>
-          </span>
-          <span>
-            <span className="text-slate-400">actual </span>
-            <span className="font-mono">{data.explicit_kpoints_rel.length}</span>
-          </span>
-          <span>
-            <span className="text-slate-400">spacing </span>
-            <span className="font-mono">{proposedSpacing.toFixed(4)}</span>
-            <span className="text-slate-400"> Å⁻¹</span>
-          </span>
-          <button
-            type="button"
-            onClick={handleRecalculate}
-            className="rounded-md border border-indigo-300 bg-indigo-50 px-2.5 py-1 font-medium text-indigo-700 transition hover:bg-indigo-100"
-          >
-            Recalculate
-          </button>
-        </div>
+          <TextRenderer
+            title="KPOINTS (VASP)"
+            text={vaspKpointsText}
+            filename="KPOINTS"
+          />
+
+          <TextRenderer
+            title="Quantum ESPRESSO pw.x input"
+            text={pwKpointsText}
+            filename="PW.in KPOINTS Block"
+          />
+        </>
       )}
 
       {data && (
-        <div className="overflow-hidden rounded-lg border border-slate-200">
-          <div className="border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">
-            Brillouin zone visualization
+        <div className="grid gap-3 lg:grid-cols-2">
+          <div className="overflow-hidden rounded-lg border border-slate-200">
+            <div className="border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">
+              Brillouin zone visualization
+            </div>
+            <div
+              ref={containerRef}
+              className="h-[480px] w-full overflow-hidden"
+            />
           </div>
-          <div
-            ref={containerRef}
-            className="h-[480px] w-full overflow-hidden"
-          />
+
+          <div className="overflow-hidden rounded-lg border border-slate-200">
+            <div className="border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">
+              Primitive cell ({structure ? "as loaded" : ""})
+            </div>
+            {structure && (
+              <div className="h-[480px] w-full">
+                <StructureVisualizer structure={structure} />
+              </div>
+            )}
+          </div>
         </div>
       )}
 
