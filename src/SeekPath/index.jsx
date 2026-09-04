@@ -19,7 +19,7 @@ export default function SeekPath({ structure, className = "" }) {
   const [withTimeReversal, setWithTimeReversal] = useState(true);
   const [referenceDistance] = useState(DEFAULT_REFERENCE_DISTANCE);
   const [pointsPerLine, setPointsPerLine] = useState(DEFAULT_POINTS_PER_LINE);
-  const [outputsOpen, setOutputsOpen] = useState({ vasp: true, pw: true });
+  const [outputsOpen, setOutputsOpen] = useState("vasp");
 
   const containerRef = useRef(null);
 
@@ -164,9 +164,9 @@ export default function SeekPath({ structure, className = "" }) {
             title="KPOINTS (VASP)"
             text={vaspKpointsText}
             filename="KPOINTS"
-            open={outputsOpen.vasp}
+            open={outputsOpen === "vasp"}
             onToggle={() =>
-              setOutputsOpen((prev) => ({ ...prev, vasp: !prev.vasp }))
+              setOutputsOpen((prev) => (prev === "vasp" ? null : "vasp"))
             }
           />
 
@@ -174,9 +174,9 @@ export default function SeekPath({ structure, className = "" }) {
             title="Quantum ESPRESSO pw.x input"
             text={pwInputText}
             filename="PW.in"
-            open={outputsOpen.pw}
+            open={outputsOpen === "pw"}
             onToggle={() =>
-              setOutputsOpen((prev) => ({ ...prev, pw: !prev.pw }))
+              setOutputsOpen((prev) => (prev === "pw" ? null : "pw"))
             }
           />
         </>
