@@ -75,11 +75,7 @@ export default function SeekPath({ structure, className = "" }) {
   };
 
   if (!structure) {
-    return (
-      <div className={`py-4 text-sm text-slate-500 ${className}`}>
-        Upload or load a structure to compute its high-symmetry k-path.
-      </div>
-    );
+    return <></>;
   }
 
   const pathSummary = data

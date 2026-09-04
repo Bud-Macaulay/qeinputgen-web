@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { fromJSON, toJSON } from "matsci-parse";
 
 import { parseFileText } from "./formats";
+import Modal from "../components/Modal";
 import {
   addHistoryEntry,
   clearHistory,
@@ -161,6 +162,47 @@ export default function CrystalStructureUpload({
         )}
       </button>
 
+      <p className="mt-3 text-center text-xs text-slate-400">
+        By continuing you agree to our{" "}
+        <a
+          href="#terms"
+          className="font-medium text-blue-600 underline-offset-2 hover:underline"
+        >
+          Terms of service
+        </a>
+      </p>
+
+      <Modal hash="terms" title="Terms of service">
+        <div className="space-y-2">
+          <h3 className="font-semibold">Links To Other Web Sites</h3>
+          <p>
+            Our Service may contain links to third­-party web sites or services
+            that are not owned or controlled by us. We have no control over, and
+            assumes no responsibility for, the content, privacy policies, or
+            practices of any third party web sites or services. You further
+            acknowledge and agree that we shall not be responsible or liable,
+            directly or indirectly, for any damage or loss caused or alleged to
+            be caused by or in connection with use of or reliance on any such
+            content, goods or services available on or through any such web
+            sites or services.
+          </p>
+          <p>
+            We strongly advise you to read the terms and conditions and privacy
+            policies of any third-­party web sites or services that you visit.
+          </p>
+          <h3 className="font-semibold">Changes</h3>
+          <p>
+            We reserve the right, at our sole discretion, to modify or replace
+            these Terms at any time. By continuing to access or use our Service
+            after those revisions become effective, you agree to be bound by the
+            revised terms. If you do not agree to the new terms, please stop
+            using the Service.
+          </p>
+          <h3 className="font-semibold">Contact Us</h3>
+          <p>If you have any questions about these Terms, please contact us.</p>
+        </div>
+      </Modal>
+
       {parsing && (
         <p className="mt-3 flex items-center gap-2 text-sm text-slate-600">
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
@@ -187,7 +229,7 @@ export default function CrystalStructureUpload({
         <div className="mt-5">
           <div className="mb-2 flex items-center justify-between">
             <p className="text-sm font-semibold text-slate-800">
-              Saved structures
+              Previously calculated structures
             </p>
             <button
               type="button"
