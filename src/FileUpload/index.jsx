@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { fromJSON, toJSON } from "matsci-parse";
 
 import { parseFileText } from "./formats";
+import { examples } from "./examples";
 import Modal from "../components/Modal";
 import {
   addHistoryEntry,
@@ -21,6 +22,7 @@ export default function CrystalStructureUpload({
   const [error, setError] = useState(null);
   const [parsedFormat, setParsedFormat] = useState(null);
   const [history, setHistory] = useState(() => loadHistory());
+  const [exampleLoading, setExampleLoading] = useState(null);
 
   useEffect(() => {
     setHistory(loadHistory());
@@ -69,6 +71,28 @@ export default function CrystalStructureUpload({
       setParsedFormat(entry.format);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const handleLoadExample = async (example) => {
+    setError(null);
+    setParsedFormat(null);
+    setExampleLoading(example.url);
+    try {
+      const res = await fetch(example.url);
+      if (!res.ok) throw new Error(`Failed to load example (${res.status})`);
+      const text = await res.text();
+      const { format, structure } = parseFileText(text);
+      setParsedFormat(format);
+      onStructureParsed?.({
+        format,
+        structure,
+        fileName: `${example.symbol}_POSCAR`,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setExampleLoading(null);
     }
   };
 
@@ -216,14 +240,38 @@ export default function CrystalStructureUpload({
         </p>
       )}
 
-      {parsedFormat && (
-        <p className="mt-3 flex items-center gap-2 text-sm text-slate-600">
-          <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
-            {parsedFormat.toUpperCase()}
-          </span>
-          File parsed successfully
+      <div className="mt-5 border-t border-slate-100 pt-4">
+        <p className="mb-2 text-sm font-semibold text-slate-800">
+          Otherwise, pick an example
         </p>
-      )}
+        <select
+          value=""
+          onChange={(e) => {
+            const example = examples.find((x) => x.url === e.target.value);
+            if (example) handleLoadExample(example);
+          }}
+          disabled={exampleLoading !== null}
+          className="w-full max-w-sm rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <option value="">
+            {exampleLoading ? "Loading example…" : "Select an example…"}
+          </option>
+          {Object.entries(
+            examples.reduce((groups, example) => {
+              (groups[example.family] ||= []).push(example);
+              return groups;
+            }, {}),
+          ).map(([family, familyExamples]) => (
+            <optgroup key={family} label={family}>
+              {familyExamples.map((example) => (
+                <option key={example.url} value={example.url}>
+                  {example.label}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      </div>
 
       {history.length > 0 && (
         <div className="mt-5">
