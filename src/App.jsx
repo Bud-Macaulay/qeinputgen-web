@@ -167,7 +167,7 @@ function App() {
 
             <SeekPath
               structure={loaded?.structure}
-              className="max-w-6xl mx-auto"
+              className="max-w-6xl mx-auto py-4"
             />
           </div>
         </div>

@@ -8,17 +8,21 @@ export const prettify = (label) =>
     .replace(/_/g, "\u2081");
 
 export function formatSpaceGroupSymbol(symbol) {
+  symbol = symbol.replace(/\s+/g, "");
   let nextIsSub = false;
   let nextIsNegative = false;
+
   return symbol.split("").map((v, index) => {
     if (v === "-") {
       nextIsNegative = true;
       return null;
     }
+
     if (v === "_") {
       nextIsSub = true;
       return null;
     }
+
     if (nextIsNegative) {
       nextIsNegative = false;
       return (
@@ -28,10 +32,12 @@ export function formatSpaceGroupSymbol(symbol) {
         </span>
       );
     }
+
     if (nextIsSub) {
       nextIsSub = false;
       return <sub key={index}>{v}</sub>;
     }
+
     return v;
   });
 }
