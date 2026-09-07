@@ -1,4 +1,4 @@
-export const STORAGE_KEY = "seekpath.parsedStructures";
+export const STORAGE_KEY = "qeinputgen.parsedStructures";
 export const MAX_HISTORY = 50;
 
 export function loadHistory() {

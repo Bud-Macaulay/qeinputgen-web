@@ -1,13 +1,13 @@
 {
-  "name": "my-react-app",
+  "name": "qeinputgen-web",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://bud-macaulay.github.io/mc-react-optimade-client",
+  "homepage": "https://bud-macaulay.github.io/qeinputgen-web",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -17,7 +17,6 @@
     "@mui/material": "^9.1.1",
     "@spglib/moyo-wasm": "0.17.0",
     "@tanstack/react-query": "^5.90.19",
-    "brillouinzone-visualizer": "0.4.4",
     "framer-motion": "^12.23.19",
     "gl-matrix": "^3.4.4",
     "lodash.debounce": "^4.0.8",
@@ -38,6 +37,7 @@
     "eslint": "^9.33.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "oxlint": "^1.81.0",
     "rollup-plugin-visualizer": "^7.0.1",
     "tailwindcss": "^4.1.16",
     "vite": "^7.1.2"

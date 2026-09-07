@@ -2,3 +2,5 @@ allowBuilds:
   esbuild: set this to true or false
 minimumReleaseAgeExclude:
   - matsci-parse@0.14.0
+overrides:
+  matsci-parse@0.14.0>matsci-parse: 0.14.0
