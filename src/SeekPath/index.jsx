@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createBZVisualizer } from "brillouinzone-visualizer";
 import StructureVisualizer from "mc-react-structure-visualizer";
-import { getBrillouinZoneData, toKPOINTS } from "matsci-parse";
+import { getBrillouinZoneData, toCrystalD3, toKPOINTS } from "matsci-parse";
 
 import { formatSpaceGroupSymbol, preparePWText, prettify } from "../utils";
 
@@ -83,6 +83,9 @@ export default function SeekPath({ structure, className = "" }) {
     : "";
 
   const vaspKpointsText = data ? toKPOINTS(data.kpath, pointsPerLine) : "";
+  const crystalD3Text = data
+    ? toCrystalD3(data.kpath, "SeeK-path band path", pointsPerLine)
+    : "";
   const pwInputText = data
     ? preparePWText(structure, data.kpath, pointsPerLine)
     : "";
@@ -177,6 +180,16 @@ export default function SeekPath({ structure, className = "" }) {
             open={outputsOpen === "pw"}
             onToggle={() =>
               setOutputsOpen((prev) => (prev === "pw" ? null : "pw"))
+            }
+          />
+
+          <TextRenderer
+            title="CRYSTAL D3 BAND"
+            text={crystalD3Text}
+            filename="BAND"
+            open={outputsOpen === "d3"}
+            onToggle={() =>
+              setOutputsOpen((prev) => (prev === "d3" ? null : "d3"))
             }
           />
         </>

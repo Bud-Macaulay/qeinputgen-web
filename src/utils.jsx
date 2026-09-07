@@ -42,29 +42,10 @@ export function formatSpaceGroupSymbol(symbol) {
   });
 }
 
-// The pw.x crystal_b card declares nks globally on line 2, but the number of
-// k-points generated per segment is actually taken from each vertex's weight
-// (the 4th column). matsci-parse writes every weight as 1, which would make
-// the band path sparse, so we rewrite the weights here.
-function withBandWeights(kpointsText, pointsPerLine) {
-  const block = kpointsText.split("\n");
-  if (block.length < 3 || !/^K_POINTS\b/i.test(block[0])) {
-    return kpointsText;
-  }
-  const header = block[0];
-  const coordinates = block.slice(2);
-  // nks is the number of supplied high-symmetry points (vertices), not the
-  // points per segment — the density is instead given by each vertex's weight.
-  const nksLine = String(coordinates.length);
-  const weighted = coordinates.map((line, i) => {
-    const tokens = line.trim().split(/\s+/);
-    if (tokens.length < 3) return line;
-    tokens[3] = String(i === coordinates.length - 1 ? 1 : pointsPerLine);
-    return tokens.join(" ");
-  });
-  return [header, nksLine, ...weighted].join("\n");
-}
-
+// The pw.x crystal_b card's per-segment density is taken from each vertex's
+// weight (the 4th column). matsci-parse `kpointsToPW` writes these
+// weights correctly (every vertex = pointsPerSegment, except the last = 1),
+// so we just pass the canonical kpath through.
 export function preparePWText(structure, kpoints, pointsPerLine) {
   if (!structure) return "";
 
@@ -110,9 +91,7 @@ export function preparePWText(structure, kpoints, pointsPerLine) {
   }
   lines.push("");
 
-  lines.push(
-    withBandWeights(kpointsToPW(kpoints, pointsPerLine), pointsPerLine),
-  );
+  lines.push(kpointsToPW(kpoints, pointsPerLine));
   lines.push("");
 
   lines.push("CELL_PARAMETERS angstrom");

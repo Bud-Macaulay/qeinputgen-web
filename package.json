@@ -21,7 +21,7 @@
     "framer-motion": "^12.23.19",
     "gl-matrix": "^3.4.4",
     "lodash.debounce": "^4.0.8",
-    "matsci-parse": "0.13.0",
+    "matsci-parse": "0.14.0",
     "mc-react-header": "^0.5.3",
     "mc-react-library": "^0.5.0",
     "mc-react-structure-visualizer": "^0.11.1",
