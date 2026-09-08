@@ -75,6 +75,9 @@ export const ACCURACY_PSEUDO_TIER = {
   high: "prec",
 };
 
-export const PSEUDO_BASE = `${import.meta.env.BASE_URL}pseudo`;
+// Remote public mirror (local copy mirrors it; override at runtime via
+// window.QEINPUTGEN_PSEUDO_BASE or VITE_PSEUDO_BASE):
+// https://rgw.cscs.ch/matcloud:mc-discover-sssp-public/v2.0
+export const PSEUDO_BASE = `https://cors.materialscloud.org/https://rgw.cscs.ch/matcloud:mc-discover-sssp-public/v2.0`;
 
 export const PSEUDO_DIR = ".";
