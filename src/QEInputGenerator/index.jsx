@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import StructureVisualizer from "mc-react-structure-visualizer";
-import { getSymmetry, toPW } from "matsci-parse";
+import { getSpecies, getSymmetry, iupacFormula, numAtoms, toPW } from "matsci-parse";
 
 import TextRenderer from "../components/TextRenderer";
 import { formatSpaceGroupSymbol } from "../utils";
@@ -73,29 +73,15 @@ export default function QEInputGenerator({ structure, className = "" }) {
   const [symmetryLoading, setSymmetryLoading] = useState(false);
   const [symmetryError, setSymmetryError] = useState(null);
 
-  const species = useMemo(() => {
-    const out = [];
-    for (const site of structure?.sites ?? []) {
-      const symbol = site.species?.symbol;
-      if (symbol && !out.includes(symbol)) out.push(symbol);
-    }
-    return out;
-  }, [structure]);
+  const species = useMemo(
+    () => (structure ? getSpecies(structure).map((s) => s.symbol) : []),
+    [structure],
+  );
 
-  const speciesCounts = useMemo(() => {
-    const counts = {};
-    for (const site of structure?.sites ?? []) {
-      const symbol = site.species?.symbol;
-      if (symbol) counts[symbol] = (counts[symbol] ?? 0) + 1;
-    }
-    return counts;
-  }, [structure]);
-
-  const formula = useMemo(() => {
-    return Object.entries(speciesCounts)
-      .map(([symbol, count]) => (count > 1 ? `${symbol}${count}` : symbol))
-      .join("");
-  }, [speciesCounts]);
+  const formula = useMemo(
+    () => (structure ? iupacFormula(structure) : ""),
+    [structure],
+  );
 
   useEffect(() => {
     if (!structure) {
@@ -411,7 +397,7 @@ export default function QEInputGenerator({ structure, className = "" }) {
             <span>
               <span className="text-slate-400">Atoms </span>
               <span className="font-mono">
-                {structure.sites.length} ({ntyp} species)
+                {numAtoms(structure)} ({ntyp} species)
               </span>
             </span>
           </div>
