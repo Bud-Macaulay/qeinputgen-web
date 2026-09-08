@@ -7,9 +7,11 @@ import { formatSpaceGroupSymbol } from "../utils";
 import {
   ACCURACY,
   ACCURACY_PSEUDO_TIER,
+  CONTROL_FIXED,
   FUNCTIONALS,
   PSEUDO_DIR,
   SMEARING,
+  SYSTEM_FIXED,
 } from "./qeconfig";
 import {
   fetchEffCutoffs,
@@ -200,7 +202,8 @@ export default function QEInputGenerator({ structure, className = "" }) {
           accuracy,
         );
         if (rec && files.some((f) => f.name === rec)) next[symbol] = rec;
-        else if (files.length > 0 && !next[symbol]) next[symbol] = files[0].name;
+        else if (files.length > 0 && !next[symbol])
+          next[symbol] = files[0].name;
       }
       return next;
     });
@@ -215,8 +218,7 @@ export default function QEInputGenerator({ structure, className = "" }) {
       const co =
         file?.cutoffs?.[tier] ??
         (tier === "prec" ? file?.cutoffs?.eff : file?.cutoffs?.prec);
-      const wfc =
-        co?.cutoff_wfc ?? fallbackCutoffs[symbol]?.cutoff_wfc ?? 0;
+      const wfc = co?.cutoff_wfc ?? fallbackCutoffs[symbol]?.cutoff_wfc ?? 0;
       if (wfc > max) max = wfc;
     }
     return Math.max(ACCURACY[accuracy].ecutwfc, max);
@@ -235,9 +237,13 @@ export default function QEInputGenerator({ structure, className = "" }) {
         title: `qeinputgen-web ${FUNCTIONALS[functional].label}`,
         calculation: "scf",
         pseudo_dir: PSEUDO_DIR,
+        etot_conv_thr: acc.etot_conv_thr,
+        forc_conv_thr: acc.forc_conv_thr,
+        ...CONTROL_FIXED,
       },
       system: {
         ecutwfc: parseFloat(effectiveEcutwfc.toFixed(1)),
+        ...SYSTEM_FIXED,
         ...smearing.system,
       },
       electrons: {
@@ -294,8 +300,9 @@ export default function QEInputGenerator({ structure, className = "" }) {
         </div>
         <div className="border-t border-slate-100 bg-slate-50/50 px-4 py-2 text-xs text-slate-500">
           k-point spacing {acc.kspacing} Å⁻¹ · plane-wave cutoff{" "}
-          {effectiveEcutwfc.toFixed(1)} Ry · convergence threshold{" "}
-          {acc.conv_thr}
+          {effectiveEcutwfc.toFixed(1)} Ry · conv_thr {acc.conv_thr} ·
+          etot_conv_thr {acc.etot_conv_thr} · forc_conv_thr{" "}
+          {acc.forc_conv_thr}
         </div>
       </div>
 
@@ -394,10 +401,10 @@ export default function QEInputGenerator({ structure, className = "" }) {
       </div>
 
       <div className="overflow-hidden rounded-lg border border-slate-200">
-        <div className="border-b border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">
+        <div className="border-b border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700  ">
           About your structure
         </div>
-        <div className="p-4">
+        <div className="p-4 ">
           <div className="mb-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-slate-600">
             {symmetryLoading && (
               <span className="text-slate-400">Determining symmetry…</span>
@@ -434,7 +441,7 @@ export default function QEInputGenerator({ structure, className = "" }) {
               </span>
             )}
           </div>
-          <div className="h-[320px] w-full">
+          <div className="h-[500px] w-[500px] mx-auto">
             <StructureVisualizer structure={structure} />
           </div>
         </div>
