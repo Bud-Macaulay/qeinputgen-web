@@ -3,6 +3,7 @@ import { fromJSON, toJSON } from "matsci-parse";
 
 import { parseFileText } from "./formats";
 import { examples } from "./examples";
+import MC3DInput from "./MC3D";
 import Modal from "../components/Modal";
 import {
   addHistoryEntry,
@@ -72,6 +73,20 @@ export default function CrystalStructureUpload({
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
+  };
+
+  const handleMC3DParsed = (opts) => {
+    setError(null);
+    setParsedFormat(opts.format);
+    const entry = {
+      id: crypto.randomUUID(),
+      fileName: opts.fileName,
+      format: opts.format,
+      date: new Date().toISOString(),
+      structure: toJSON(opts.structure),
+    };
+    setHistory(addHistoryEntry(entry));
+    onStructureParsed?.(opts);
   };
 
   const handleLoadExample = async (example) => {
@@ -240,43 +255,48 @@ export default function CrystalStructureUpload({
       )}
 
       <div className="mt-5 border-t border-slate-100 pt-4">
-        <p className="mb-2 text-sm font-semibold text-slate-800">
-          Otherwise, pick an example
-        </p>
-        <select
-          value=""
-          onChange={(e) => {
-            const example = examples.find((x) => x.url === e.target.value);
-            if (example) handleLoadExample(example);
-          }}
-          disabled={exampleLoading !== null}
-          className="w-full max-w-sm rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <option value="">
-            {exampleLoading ? "Loading example…" : "Select an example…"}
-          </option>
-          {Object.entries(
-            examples.reduce((groups, example) => {
-              (groups[example.family] ||= []).push(example);
-              return groups;
-            }, {}),
-          ).map(([family, familyExamples]) => (
-            <optgroup key={family} label={family}>
-              {familyExamples.map((example) => (
-                <option key={example.url} value={example.url}>
-                  {example.label}
-                </option>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <MC3DInput onStructureParsed={handleMC3DParsed} />
+          <div>
+            <p className="mb-2 text-sm font-semibold text-slate-800">
+              Otherwise, pick an example
+            </p>
+            <select
+              value=""
+              onChange={(e) => {
+                const example = examples.find((x) => x.url === e.target.value);
+                if (example) handleLoadExample(example);
+              }}
+              disabled={exampleLoading !== null}
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <option value="">
+                {exampleLoading ? "Loading example…" : "Select an example…"}
+              </option>
+              {Object.entries(
+                examples.reduce((groups, example) => {
+                  (groups[example.family] ||= []).push(example);
+                  return groups;
+                }, {}),
+              ).map(([family, familyExamples]) => (
+                <optgroup key={family} label={family}>
+                  {familyExamples.map((example) => (
+                    <option key={example.url} value={example.url}>
+                      {example.label}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
-            </optgroup>
-          ))}
-        </select>
+            </select>
+          </div>
+        </div>
       </div>
 
       {history.length > 0 && (
         <div className="mt-5">
           <div className="mb-2 flex items-center justify-between">
             <p className="text-sm font-semibold text-slate-800">
-              Previously calculated structures
+              Your previously loaded structures
             </p>
             <button
               type="button"
