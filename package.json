@@ -8,6 +8,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint .",
+    "pseudos": "node scripts/fetch-pseudos.mjs",
+    "pseudos:check": "node scripts/verify-pseudos.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

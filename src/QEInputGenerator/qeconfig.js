@@ -75,7 +75,6 @@ export const ACCURACY_PSEUDO_TIER = {
   high: "prec",
 };
 
-export const PSEUDO_BASE =
-  "https://rgw.cscs.ch/matcloud:mc-discover-sssp-public/v2.0";
+export const PSEUDO_BASE = `${import.meta.env.BASE_URL}pseudo`;
 
 export const PSEUDO_DIR = ".";

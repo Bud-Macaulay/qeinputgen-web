@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Mirrored SSSP pseudopotential library (fetched with `pnpm pseudos`)
+public/pseudo
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
