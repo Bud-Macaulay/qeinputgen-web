@@ -81,13 +81,12 @@ export default function CrystalStructureUpload({
     try {
       const res = await fetch(example.url);
       if (!res.ok) throw new Error(`Failed to load example (${res.status})`);
-      const text = await res.text();
-      const { format, structure } = parseFileText(text);
-      setParsedFormat(format);
+      const structure = fromJSON(JSON.parse(await res.text()));
+      setParsedFormat("json");
       onStructureParsed?.({
-        format,
+        format: "json",
         structure,
-        fileName: `${example.symbol}_POSCAR`,
+        fileName: `${example.symbol}.json`,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
