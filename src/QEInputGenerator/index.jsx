@@ -57,22 +57,6 @@ function Select({ label, value, options, onChange }) {
   );
 }
 
-function latticeParams(lattice) {
-  const b = lattice?.basis?.data ?? [];
-  if (b.length < 9) return null;
-  const [ax, ay, az, bx, by, bz, cx, cy, cz] = b;
-  const la = Math.hypot(ax, ay, az);
-  const lb = Math.hypot(bx, by, bz);
-  const lc = Math.hypot(cx, cy, cz);
-  const alpha =
-    (Math.acos((bx * cx + by * cy + bz * cz) / (lb * lc)) * 180) / Math.PI;
-  const beta =
-    (Math.acos((ax * cx + ay * cy + az * cz) / (la * lc)) * 180) / Math.PI;
-  const gamma =
-    (Math.acos((ax * bx + ay * by + az * bz) / (la * lb)) * 180) / Math.PI;
-  return { lengths: [la, lb, lc], angles: [alpha, beta, gamma] };
-}
-
 export default function QEInputGenerator({ structure, className = "" }) {
   const [accuracy, setAccuracy] = useState("medium");
   const [functional, setFunctional] = useState("pbe");
@@ -267,7 +251,7 @@ export default function QEInputGenerator({ structure, className = "" }) {
   if (!structure) return <></>;
 
   const acc = ACCURACY[accuracy];
-  const lat = latticeParams(structure.lattice);
+  // const lat = latticeParams(structure.lattice);
   const ntyp = species.length;
   const tarballUrl = recommendedTarballUrl(functional, accuracy);
   const calcResults = symmetry?.calculationResults;
@@ -301,8 +285,7 @@ export default function QEInputGenerator({ structure, className = "" }) {
         <div className="border-t border-slate-100 bg-slate-50/50 px-4 py-2 text-xs text-slate-500">
           k-point spacing {acc.kspacing} Å⁻¹ · plane-wave cutoff{" "}
           {effectiveEcutwfc.toFixed(1)} Ry · conv_thr {acc.conv_thr} ·
-          etot_conv_thr {acc.etot_conv_thr} · forc_conv_thr{" "}
-          {acc.forc_conv_thr}
+          etot_conv_thr {acc.etot_conv_thr} · forc_conv_thr {acc.forc_conv_thr}
         </div>
       </div>
 
@@ -431,15 +414,6 @@ export default function QEInputGenerator({ structure, className = "" }) {
                 {structure.sites.length} ({ntyp} species)
               </span>
             </span>
-            {lat && (
-              <span>
-                <span className="text-slate-400">Lattice </span>
-                <span className="font-mono">
-                  {lat.lengths.map((l) => l.toFixed(3)).join(", ")} Å /{" "}
-                  {lat.angles.map((a) => a.toFixed(1)).join(", ")}°
-                </span>
-              </span>
-            )}
           </div>
           <div className="h-[500px] w-[500px] mx-auto">
             <StructureVisualizer structure={structure} />
