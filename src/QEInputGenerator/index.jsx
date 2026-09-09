@@ -89,6 +89,7 @@ export default function QEInputGenerator({ structure, className = "" }) {
   const [symmetry, setSymmetry] = useState(null);
   const [symmetryLoading, setSymmetryLoading] = useState(false);
   const [symmetryError, setSymmetryError] = useState(null);
+  const [downloadingPseudo, setDownloadingPseudo] = useState(null);
 
   const species = useMemo(
     () => (structure ? getSpecies(structure).map((s) => s.symbol) : []),
@@ -275,6 +276,30 @@ export default function QEInputGenerator({ structure, className = "" }) {
 
   if (!structure) return <></>;
 
+  const downloadPseudo = async (symbol, filename) => {
+    if (downloadingPseudo) return;
+    setDownloadingPseudo(symbol);
+    try {
+      const res = await fetch(pseudoDownloadUrl(symbol, filename));
+      if (!res.ok) {
+        throw new Error(`Download failed (${res.status})`);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(`Could not download ${filename}:\n${err.message}`);
+    } finally {
+      setDownloadingPseudo(null);
+    }
+  };
+
   const acc = ACCURACY[accuracy];
   // const lat = latticeParams(structure.lattice);
   const ntyp = species.length;
@@ -415,14 +440,14 @@ export default function QEInputGenerator({ structure, className = "" }) {
                       )}
                     </span>
                     {selected && (
-                      <a
-                        href={pseudoDownloadUrl(symbol, selected)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs font-medium text-blue-600 hover:underline"
+                      <button
+                        type="button"
+                        onClick={() => downloadPseudo(symbol, selected)}
+                        disabled={downloadingPseudo === symbol}
+                        className="w-16 text-xs font-medium text-blue-600 hover:underline disabled:opacity-50"
                       >
-                        Download
-                      </a>
+                        {downloadingPseudo === symbol ? "…" : "Download"}
+                      </button>
                     )}
                   </div>
                 </div>
