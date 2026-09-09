@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CopyIcon, CheckIcon, DownloadIcon } from "../Icons";
+import { buildZip } from "../../QEInputGenerator/zip";
 
 export default function TextRenderer({
   title,
@@ -7,9 +8,12 @@ export default function TextRenderer({
   filename = "text.txt",
   open: openProp,
   onToggle,
+  zipFiles,
+  zipName = "input-set.zip",
 }) {
   const [openInternal, setOpenInternal] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [zipping, setZipping] = useState(false);
 
   const open = openProp !== undefined ? openProp : openInternal;
   const setOpen = onToggle ? onToggle : setOpenInternal;
@@ -42,6 +46,33 @@ export default function TextRenderer({
     link.remove();
 
     URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadZip = async (e) => {
+    e.stopPropagation();
+    if (zipping) return;
+    setZipping(true);
+    try {
+      const entries = [{ name: filename, data: text }];
+      await Promise.allSettled(
+        (zipFiles ?? []).map(async ({ name, url }) => {
+          const res = await fetch(url);
+          if (!res.ok) return;
+          entries.push({ name, data: new Uint8Array(await res.arrayBuffer()) });
+        }),
+      );
+      const blob = await buildZip(entries);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = zipName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } finally {
+      setZipping(false);
+    }
   };
 
   return (
@@ -105,6 +136,18 @@ export default function TextRenderer({
             <DownloadIcon className="h-4 w-4" />
             <span>Download</span>
           </button>
+
+          {zipFiles?.length > 0 && (
+            <button
+              type="button"
+              onClick={handleDownloadZip}
+              disabled={zipping}
+              className="inline-flex items-center gap-2 rounded border border-blue-200 bg-white px-3 py-1.5 text-sm font-medium text-blue-700 transition hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <DownloadIcon className="h-4 w-4" />
+              <span>{zipping ? "Zipping…" : "Input set (.zip)"}</span>
+            </button>
+          )}
         </div>
       </div>
 

@@ -1,8 +1,10 @@
+// Plane-wave cutoffs (ecutwfc / ecutrho) are DERIVED from the selected
+// pseudopotential (UPF) file's metadata cutoffs, not configured here.
+// See effectiveCutoffs in QEInputGenerator/index.jsx.
 export const ACCURACY = {
   low: {
     label: "Low",
     kspacing: 0.3,
-    ecutwfc: 40,
     conv_thr: 1e-5,
     etot_conv_thr: 2e-4,
     forc_conv_thr: 1e-3,
@@ -10,7 +12,6 @@ export const ACCURACY = {
   medium: {
     label: "Medium",
     kspacing: 0.15,
-    ecutwfc: 60,
     conv_thr: 1e-6,
     etot_conv_thr: 2e-5,
     forc_conv_thr: 1e-4,
@@ -18,7 +19,6 @@ export const ACCURACY = {
   high: {
     label: "High",
     kspacing: 0.1,
-    ecutwfc: 80,
     conv_thr: 1e-7,
     etot_conv_thr: 1e-5,
     forc_conv_thr: 5e-5,
@@ -80,4 +80,7 @@ export const ACCURACY_PSEUDO_TIER = {
 // https://rgw.cscs.ch/matcloud:mc-discover-sssp-public/v2.0
 export const PSEUDO_BASE = `https://cors.materialscloud.org/https://rgw.cscs.ch/matcloud:mc-discover-sssp-public/v2.0`;
 
-export const PSEUDO_DIR = ".";
+// Directory pw.x reads pseudopotentials from. Standard SSSP v2.0 layout: a
+// top-level `pseudo/` folder holding the UPF files, so input sets generated
+// here run against (and the zip download bundles into) that exact layout.
+export const PSEUDO_DIR = "./pseudo/";

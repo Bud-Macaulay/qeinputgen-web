@@ -59,3 +59,30 @@ export function recommendedTarballUrl(functional, accuracy) {
   const base = getPseudoBase();
   return `${base}/library/${tier}_${functional}_recommended.tar.gz`;
 }
+
+// Resolve the plane-wave cutoffs for a pseudo file entry. Structured cutoffs
+// live under file.cutoffs[<tier>] for recommended pseudos; the rest carry a
+// single number under csv_ecut_eff / csv_ecut_prec. QE's default ecutrho is
+// 4 × ecutwfc, so we fall back to that when only the plane-wave cutoff is
+// published (marked as derivedRho).
+export function resolveCutoffs(file, tier = "eff") {
+  if (!file) return null;
+  const other = tier === "prec" ? "eff" : "prec";
+  const co = file.cutoffs?.[tier] ?? file.cutoffs?.[other];
+  if (co && (co.cutoff_wfc != null || co.cutoff_rho != null)) {
+    const ecutwfc = co.cutoff_wfc != null ? Number(co.cutoff_wfc) : null;
+    const ecutrho = co.cutoff_rho != null ? Number(co.cutoff_rho) : null;
+    return {
+      ecutwfc,
+      ecutrho: ecutrho ?? (ecutwfc != null ? 4 * ecutwfc : null),
+      derivedRho: ecutrho == null,
+    };
+  }
+  const csv =
+    tier === "prec"
+      ? (file.csv_ecut_prec ?? file.csv_ecut_eff)
+      : (file.csv_ecut_eff ?? file.csv_ecut_prec);
+  const wfc = Number(csv);
+  if (!Number.isFinite(wfc) || wfc <= 0) return null;
+  return { ecutwfc: wfc, ecutrho: 4 * wfc, derivedRho: true };
+}

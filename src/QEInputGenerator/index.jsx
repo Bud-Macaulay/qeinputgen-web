@@ -19,6 +19,7 @@ import {
   pseudoDownloadUrl,
   recommendedPseudoName,
   recommendedTarballUrl,
+  resolveCutoffs,
 } from "./pseudo";
 
 const ACCURACY_OPTIONS = Object.entries(ACCURACY).map(([value, cfg]) => ({
@@ -179,20 +180,20 @@ export default function QEInputGenerator({ structure, className = "" }) {
     });
   }, [species, pseudoMeta, pseudoFiles, functional, accuracy]);
 
-  const effectiveEcutwfc = useMemo(() => {
-    if (!species.length) return 0;
-    let max = 0;
+  const effectiveCutoffs = useMemo(() => {
+    if (!species.length) return { ecutwfc: 0, ecutrho: 0 };
+    let wfc = 0;
+    let rho = 0;
     for (const symbol of species) {
-      const selected = selections[symbol];
-      const file = (pseudoFiles[symbol] ?? []).find((f) => f.name === selected);
-      const co =
-        file?.cutoffs?.[tier] ??
-        (tier === "prec" ? file?.cutoffs?.eff : file?.cutoffs?.prec);
-      const wfc = co?.cutoff_wfc ?? fallbackCutoffs[symbol]?.cutoff_wfc ?? 0;
-      if (wfc > max) max = wfc;
+      const file = (pseudoFiles[symbol] ?? []).find(
+        (f) => f.name === selections[symbol],
+      );
+      const co = resolveCutoffs(file, tier);
+      wfc = Math.max(wfc, co?.ecutwfc ?? fallbackCutoffs[symbol]?.cutoff_wfc ?? 0);
+      rho = Math.max(rho, co?.ecutrho ?? fallbackCutoffs[symbol]?.cutoff_rho ?? 0);
     }
-    return Math.max(ACCURACY[accuracy].ecutwfc, max);
-  }, [species, selections, pseudoFiles, fallbackCutoffs, accuracy, tier]);
+    return { ecutwfc: wfc, ecutrho: rho };
+  }, [species, selections, pseudoFiles, fallbackCutoffs, tier]);
 
   const pwText = useMemo(() => {
     if (!structure || !species.length) return "";
@@ -212,7 +213,12 @@ export default function QEInputGenerator({ structure, className = "" }) {
         ...CONTROL_FIXED,
       },
       system: {
-        ecutwfc: parseFloat(effectiveEcutwfc.toFixed(1)),
+        ...(effectiveCutoffs.ecutwfc > 0 && {
+          ecutwfc: parseFloat(effectiveCutoffs.ecutwfc.toFixed(1)),
+        }),
+        ...(effectiveCutoffs.ecutrho > 0 && {
+          ecutrho: parseFloat(effectiveCutoffs.ecutrho.toFixed(1)),
+        }),
         ...SYSTEM_FIXED,
         ...smearing.system,
       },
@@ -231,8 +237,19 @@ export default function QEInputGenerator({ structure, className = "" }) {
     accuracy,
     functional,
     smearingKey,
-    effectiveEcutwfc,
+    effectiveCutoffs,
   ]);
+
+  const zipFiles = useMemo(
+    () =>
+      species
+        .filter((s) => selections[s])
+        .map((s) => ({
+          name: `pseudo/${selections[s]}`,
+          url: pseudoDownloadUrl(s, selections[s]),
+        })),
+    [species, selections],
+  );
 
   if (!structure) return <></>;
 
@@ -270,14 +287,21 @@ export default function QEInputGenerator({ structure, className = "" }) {
         </div>
         <div className="border-t border-slate-100 bg-slate-50/50 px-4 py-2 text-xs text-slate-500">
           k-point spacing {acc.kspacing} Å⁻¹ · plane-wave cutoff{" "}
-          {effectiveEcutwfc.toFixed(1)} Ry · conv_thr {acc.conv_thr} ·
-          etot_conv_thr {acc.etot_conv_thr} · forc_conv_thr {acc.forc_conv_thr}
+          {effectiveCutoffs.ecutwfc > 0
+            ? `${effectiveCutoffs.ecutwfc.toFixed(1)} Ry`
+            : "—"}{" "}
+          · charge-density cutoff{" "}
+          {effectiveCutoffs.ecutrho > 0
+            ? `${effectiveCutoffs.ecutrho.toFixed(1)} Ry`
+            : "—"}{" "}
+          · conv_thr {acc.conv_thr} · etot_conv_thr {acc.etot_conv_thr} ·
+          forc_conv_thr {acc.forc_conv_thr}
         </div>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-slate-200">
         <div className="border-b border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">
-          Pseudopotentials (SSSP, {tier} tier)
+          Pseudopotentials (SSSP v2.0, {tier} tier)
         </div>
         {pseudoLoading && (
           <div className="flex h-24 items-center justify-center text-sm text-slate-500">
@@ -300,6 +324,7 @@ export default function QEInputGenerator({ structure, className = "" }) {
                 functional,
                 accuracy,
               );
+              const co = resolveCutoffs(file, tier);
               return (
                 <div
                   key={symbol}
@@ -321,6 +346,7 @@ export default function QEInputGenerator({ structure, className = "" }) {
                     >
                       {files.map((f) => (
                         <option key={f.name} value={f.name}>
+                          {f.name === rec ? "★ " : ""}
                           {f.name}
                         </option>
                       ))}
@@ -328,6 +354,22 @@ export default function QEInputGenerator({ structure, className = "" }) {
                   ) : (
                     <span className="flex-1 text-xs text-red-600">
                       No pseudopotentials found
+                    </span>
+                  )}
+                  {co?.ecutwfc != null && (
+                    <span
+                      className="whitespace-nowrap font-mono text-[10px] text-slate-500"
+                      title={co.derivedRho ? "cutoffs read from csv_ecut_*; ecutrho = 4 × ecutwfc (QE default)" : "cutoffs read from UPF metadata"}
+                    >
+                      ecutwfc {co.ecutwfc} Ry
+                    </span>
+                  )}
+                  {co?.ecutrho != null && (
+                    <span
+                      className="whitespace-nowrap font-mono text-[10px] text-slate-500"
+                      title={co.derivedRho ? "ecutrho = 4 × ecutwfc (QE default)" : "cutoffs read from UPF metadata"}
+                    >
+                      ecutrho {co.ecutrho} Ry
                     </span>
                   )}
                   {file?.pp_type && (
@@ -411,6 +453,8 @@ export default function QEInputGenerator({ structure, className = "" }) {
         title="Quantum ESPRESSO pw.x input"
         text={pwText}
         filename="PW.in"
+        zipFiles={zipFiles}
+        zipName={`qeinputgen-${formula || "input-set"}.zip`}
       />
     </div>
   );
