@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import StructureVisualizer from "mc-react-structure-visualizer";
-import { getSpecies, getSymmetry, iupacFormula, numAtoms, toPW } from "matsci-parse";
+import {
+  getSpecies,
+  getSymmetry,
+  iupacFormula,
+  numAtoms,
+  toPW,
+} from "matsci-parse";
 
 import TextRenderer from "../components/TextRenderer";
 import { formatSpaceGroupSymbol } from "../utils";
@@ -36,6 +42,16 @@ const SMEARING_OPTIONS = Object.entries(SMEARING).map(([value, cfg]) => ({
   value,
   label: cfg.label,
 }));
+
+const PP_LABELS = { us: "US", nc: "NC", paw: "PAW" };
+const PP_ORDER = ["us", "nc", "paw", "other"];
+
+function groupPseudos(files) {
+  return PP_ORDER.map((type) => ({
+    label: PP_LABELS[type] ?? "Other",
+    list: files.filter((f) => (f.pp_type ?? "other") === type),
+  })).filter((g) => g.list.length > 0);
+}
 
 function Select({ label, value, options, onChange }) {
   return (
@@ -189,8 +205,14 @@ export default function QEInputGenerator({ structure, className = "" }) {
         (f) => f.name === selections[symbol],
       );
       const co = resolveCutoffs(file, tier);
-      wfc = Math.max(wfc, co?.ecutwfc ?? fallbackCutoffs[symbol]?.cutoff_wfc ?? 0);
-      rho = Math.max(rho, co?.ecutrho ?? fallbackCutoffs[symbol]?.cutoff_rho ?? 0);
+      wfc = Math.max(
+        wfc,
+        co?.ecutwfc ?? fallbackCutoffs[symbol]?.cutoff_wfc ?? 0,
+      );
+      rho = Math.max(
+        rho,
+        co?.ecutrho ?? fallbackCutoffs[symbol]?.cutoff_rho ?? 0,
+      );
     }
     return { ecutwfc: wfc, ecutrho: rho };
   }, [species, selections, pseudoFiles, fallbackCutoffs, tier]);
@@ -325,12 +347,13 @@ export default function QEInputGenerator({ structure, className = "" }) {
                 accuracy,
               );
               const co = resolveCutoffs(file, tier);
+              const groups = groupPseudos(files);
               return (
                 <div
                   key={symbol}
-                  className="flex flex-wrap items-center gap-3 px-4 py-3"
+                  className="grid grid-cols-[2.25rem_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3"
                 >
-                  <span className="w-10 text-sm font-semibold text-slate-800">
+                  <span className="text-sm font-semibold text-slate-800">
                     {symbol}
                   </span>
                   {files.length > 0 ? (
@@ -342,56 +365,66 @@ export default function QEInputGenerator({ structure, className = "" }) {
                           [symbol]: e.target.value,
                         }))
                       }
-                      className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 font-mono text-xs text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                      className="min-w-0 w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 font-mono text-xs text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
                     >
-                      {files.map((f) => (
-                        <option key={f.name} value={f.name}>
-                          {f.name === rec ? "★ " : ""}
-                          {f.name}
-                        </option>
+                      {groups.map((group) => (
+                        <optgroup key={group.label} label={group.label}>
+                          {group.list.map((f) => (
+                            <option key={f.name} value={f.name}>
+                              {f.name === rec ? "★ " : ""}
+                              {f.name}
+                            </option>
+                          ))}
+                        </optgroup>
                       ))}
                     </select>
                   ) : (
-                    <span className="flex-1 text-xs text-red-600">
+                    <span className="text-xs text-red-600">
                       No pseudopotentials found
                     </span>
                   )}
-                  {co?.ecutwfc != null && (
+                  <div className="flex items-center gap-3 overflow-hidden">
                     <span
-                      className="whitespace-nowrap font-mono text-[10px] text-slate-500"
-                      title={co.derivedRho ? "cutoffs read from csv_ecut_*; ecutrho = 4 × ecutwfc (QE default)" : "cutoffs read from UPF metadata"}
+                      className="inline-block w-24 truncate font-mono text-[10px] text-slate-500"
+                      title={
+                        co?.derivedRho
+                          ? "cutoffs read from csv_ecut_*; ecutrho = 4 × ecutwfc (QE default)"
+                          : "cutoffs read from UPF metadata"
+                      }
                     >
-                      ecutwfc {co.ecutwfc} Ry
+                      ecutwfc {co?.ecutwfc ?? "—"} Ry
                     </span>
-                  )}
-                  {co?.ecutrho != null && (
                     <span
-                      className="whitespace-nowrap font-mono text-[10px] text-slate-500"
-                      title={co.derivedRho ? "ecutrho = 4 × ecutwfc (QE default)" : "cutoffs read from UPF metadata"}
+                      className="inline-block w-24 truncate font-mono text-[10px] text-slate-500"
+                      title={
+                        co?.derivedRho
+                          ? "ecutrho = 4 × ecutwfc (QE default)"
+                          : "cutoffs read from UPF metadata"
+                      }
                     >
-                      ecutrho {co.ecutrho} Ry
+                      ecutrho {co?.ecutrho ?? "—"} Ry
                     </span>
-                  )}
-                  {file?.pp_type && (
-                    <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
-                      {file.pp_type.toUpperCase()}
+                    <span className="inline-flex w-10 items-center justify-center rounded-full bg-slate-100 py-0.5 text-[10px] font-medium text-slate-600">
+                      {(file?.pp_type ?? "—").toUpperCase()}
                     </span>
-                  )}
-                  {selected && selected === rec && (
-                    <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
-                      recommended
+                    <span className="flex w-20 justify-center">
+                      {selected && selected === rec && (
+                        <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                          recommended
+                        </span>
+                      )}
                     </span>
-                  )}
-                  {selected && (
-                    <a
-                      href={pseudoDownloadUrl(symbol, selected)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-xs font-medium text-blue-600 hover:underline"
-                    >
-                      Download
-                    </a>
-                  )}
+                    {selected && (
+                      <a
+                        href={pseudoDownloadUrl(symbol, selected)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs font-medium text-blue-600 hover:underline"
+                      >
+                        Download
+                      </a>
+                    )}
+                  </div>
                 </div>
               );
             })}
