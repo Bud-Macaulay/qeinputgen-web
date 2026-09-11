@@ -78,7 +78,7 @@ function App() {
                     structure you generated yourself.
                   </p>
 
-                  <p class>
+                  <p>
                     Note that we do not keep track or store any of the files you
                     upload to the service, and thus obviously we do not share or
                     disclose them to anyone - ourselves or third parties. More
@@ -274,7 +274,7 @@ function App() {
                             forc_conv_thr (Ry/bohr)
                           </th>
                           <th scope="col" className="px-6 py-4 font-semibold">
-                            &ELECTRONS conv_thr (Ry/atom)
+                            &amp;ELECTRONS conv_thr (Ry/atom)
                           </th>
                         </tr>
                       </thead>
@@ -391,26 +391,28 @@ function App() {
                     <li>
                       More complex but standardized workflows are being
                       developed, exploiting the workflow engine of{" "}
-                      <a href="http://aiida.net" target="_blank">
+                      <a href="https://aiida.net" target="_blank" rel="noopener noreferrer">
                         AiiDA
                       </a>
                       . The{" "}
                       <a
                         href="https://www.materialscloud.org/work/quantum-mobile"
                         target="_blank"
+                        rel="noopener noreferrer"
                       >
                         Quantum Mobile
                       </a>{" "}
                       virtual machine that you can run on any computer (Windows,
                       Mac, Linux, etc...) provides an Ubuntu environment which
                       comes with Quantum ESPRESSO, AiiDA, and all the other{" "}
-                      <a href="http://max-centre.eu" target="_blank">
+                      <a href="https://max-centre.eu" target="_blank" rel="noopener noreferrer">
                         MaX
                       </a>{" "}
                       codes preinstalled and ready to run. Additionally, the{" "}
                       <a
                         href="https://aiidalab-qe.readthedocs.io/"
                         target="_blank"
+                        rel="noopener noreferrer"
                       >
                         {" "}
                         AiiDAlab QE app

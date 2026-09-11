@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import StructureVisualizer from "mc-react-structure-visualizer";
 import {
   getSpecies,
@@ -46,6 +46,8 @@ const SMEARING_OPTIONS = Object.entries(SMEARING).map(([value, cfg]) => ({
 
 const PP_LABELS = { us: "US", nc: "NC", paw: "PAW" };
 const PP_ORDER = ["us", "nc", "paw", "other"];
+
+const MemoStructureVisualizer = memo(StructureVisualizer);
 
 function groupPseudos(files) {
   return PP_ORDER.map((type) => ({
@@ -137,39 +139,41 @@ export default function QEInputGenerator({ structure, className = "" }) {
     const load = async () => {
       setPseudoLoading(true);
       setPseudoError(null);
+      const [metaResults, cutoffsResult] = await Promise.all([
+        Promise.allSettled(species.map((symbol) => fetchElementMeta(symbol))),
+        fetchEffCutoffs().then(
+          (value) => ({ ok: true, value }),
+          (err) => ({ ok: false, err }),
+        ),
+      ]);
+      if (cancelled) return;
       const meta = {};
       const files = {};
       let sawError = null;
-      for (const symbol of species) {
-        try {
-          const data = await fetchElementMeta(symbol);
-          if (cancelled) return;
-          meta[symbol] = data;
-          files[symbol] = data.files ?? [];
-        } catch (err) {
-          if (cancelled) return;
+      metaResults.forEach((result, index) => {
+        const symbol = species[index];
+        if (result.status === "fulfilled") {
+          meta[symbol] = result.value;
+          files[symbol] = result.value.files ?? [];
+        } else {
           meta[symbol] = null;
           files[symbol] = [];
-          sawError = err instanceof Error ? err.message : String(err);
+          sawError =
+            result.reason instanceof Error
+              ? result.reason.message
+              : String(result.reason);
         }
+      });
+      if (cutoffsResult.ok) setFallbackCutoffs(cutoffsResult.value);
+      else setFallbackCutoffs({});
+      setPseudoMeta(meta);
+      setPseudoFiles(files);
+      if (sawError) {
+        setPseudoError(
+          `Some pseudopotential metadata could not be loaded: ${sawError}`,
+        );
       }
-      try {
-        const cutoffs = await fetchEffCutoffs();
-        if (cancelled) return;
-        setFallbackCutoffs(cutoffs);
-      } catch {
-        if (!cancelled) setFallbackCutoffs({});
-      }
-      if (!cancelled) {
-        setPseudoMeta(meta);
-        setPseudoFiles(files);
-        if (sawError) {
-          setPseudoError(
-            `Some pseudopotential metadata could not be loaded: ${sawError}`,
-          );
-        }
-        setPseudoLoading(false);
-      }
+      setPseudoLoading(false);
     };
     load();
     return () => {
@@ -508,7 +512,7 @@ export default function QEInputGenerator({ structure, className = "" }) {
             </span>
           </div>
           <div className="h-[500px] w-[500px] mx-auto">
-            <StructureVisualizer structure={structure} />
+            <MemoStructureVisualizer structure={structure} />
           </div>
         </div>
       </div>
