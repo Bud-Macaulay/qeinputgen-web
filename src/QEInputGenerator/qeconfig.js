@@ -1,27 +1,58 @@
 // Plane-wave cutoffs (ecutwfc / ecutrho) are DERIVED from the selected
 // pseudopotential (UPF) file's metadata cutoffs, not configured here.
 // See effectiveCutoffs in QEInputGenerator/index.jsx.
-export const ACCURACY = {
-  low: {
-    label: "Low",
-    kspacing: 0.3,
-    conv_thr: 1e-5,
-    etot_conv_thr: 2e-4,
+
+// "fast" / "balanced" / "stringent" protocols (see the Instructions accordion):
+// each combines a pseudopotential flavor, a k-point & smearing level, and a
+// convergence-threshold level.
+export const PROTOCOLS = {
+  fast: {
+    label: "Fast",
+    pseudo: "eff",
+    kpoints: "coarse",
+    thresholds: "loose",
+  },
+  balanced: {
+    label: "Balanced",
+    pseudo: "eff",
+    kpoints: "medium",
+    thresholds: "intermediate",
+  },
+  stringent: {
+    label: "Stringent",
+    pseudo: "prec",
+    kpoints: "fine",
+    thresholds: "tight",
+  },
+};
+
+// k-point sampling is coupled to smearing (degauss): a coarser grid benefits
+// from more smearing.
+export const KPOINTS = {
+  coarse: { label: "Coarse", kspacing: 0.3, degauss: 0.0275 },
+  medium: { label: "Medium", kspacing: 0.15, degauss: 0.02 },
+  fine: { label: "Fine", kspacing: 0.1, degauss: 0.0125 },
+};
+
+// Convergence thresholds. etot_conv_thr and conv_thr are per-atom quantities.
+export const THRESHOLDS = {
+  loose: {
+    label: "Loose",
+    etot_conv_thr: 1e-4,
     forc_conv_thr: 1e-3,
+    conv_thr: 4e-10,
   },
-  medium: {
-    label: "Medium",
-    kspacing: 0.15,
-    conv_thr: 1e-6,
-    etot_conv_thr: 2e-5,
-    forc_conv_thr: 1e-4,
-  },
-  high: {
-    label: "High",
-    kspacing: 0.1,
-    conv_thr: 1e-7,
+  intermediate: {
+    label: "Intermediate",
     etot_conv_thr: 1e-5,
+    forc_conv_thr: 1e-4,
+    conv_thr: 2e-10,
+  },
+  tight: {
+    label: "Tight",
+    etot_conv_thr: 5e-6,
     forc_conv_thr: 5e-5,
+    conv_thr: 1e-10,
   },
 };
 
@@ -41,13 +72,14 @@ export const FUNCTIONALS = {
   pbesol: { label: "PBEsol" },
 };
 
+// Occupations / spin treatment. The smearing width (degauss) is not fixed here;
+// it comes from the chosen k-point level, see KPOINTS.
 export const SMEARING = {
   metallic: {
     label: "Metallic (non-magnetic)",
     system: {
       occupations: "smearing",
       smearing: "cold",
-      degauss: 0.02,
       nspin: 1,
     },
   },
@@ -63,16 +95,9 @@ export const SMEARING = {
     system: {
       occupations: "smearing",
       smearing: "cold",
-      degauss: 0.02,
       nspin: 2,
     },
   },
-};
-
-export const ACCURACY_PSEUDO_TIER = {
-  low: "eff",
-  medium: "eff",
-  high: "prec",
 };
 
 // Remote public mirror (local copy mirrors it; override at runtime via

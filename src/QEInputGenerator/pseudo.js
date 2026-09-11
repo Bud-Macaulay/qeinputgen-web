@@ -1,4 +1,4 @@
-import { ACCURACY_PSEUDO_TIER, PSEUDO_BASE } from "./qeconfig";
+import { PSEUDO_BASE } from "./qeconfig";
 
 export function getPseudoBase() {
   if (typeof window !== "undefined" && window.QEINPUTGEN_PSEUDO_BASE) {
@@ -37,14 +37,9 @@ export async function fetchEffCutoffs() {
   return data;
 }
 
-export function recommendedPseudoName(meta, functional, accuracy) {
+export function recommendedPseudoName(meta, functional, tier) {
   if (!meta?.recommended) return null;
-  const tier = ACCURACY_PSEUDO_TIER[accuracy];
   return meta.recommended[`${tier}_${functional}`] ?? null;
-}
-
-export function pseudoTierForAccuracy(accuracy) {
-  return ACCURACY_PSEUDO_TIER[accuracy];
 }
 
 export function pseudoDownloadUrl(symbol, filename) {
@@ -54,8 +49,7 @@ export function pseudoDownloadUrl(symbol, filename) {
   )}/all_upf_files/${encodeURIComponent(filename)}`;
 }
 
-export function recommendedTarballUrl(functional, accuracy) {
-  const tier = ACCURACY_PSEUDO_TIER[accuracy];
+export function recommendedTarballUrl(functional, tier) {
   const base = getPseudoBase();
   return `${base}/library/${tier}_${functional}_recommended.tar.gz`;
 }

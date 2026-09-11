@@ -11,13 +11,14 @@ import {
 import TextRenderer from "../components/TextRenderer";
 import { formatSpaceGroupSymbol } from "../utils";
 import {
-  ACCURACY,
-  ACCURACY_PSEUDO_TIER,
   CONTROL_FIXED,
   FUNCTIONALS,
+  KPOINTS,
   PSEUDO_DIR,
+  PROTOCOLS,
   SMEARING,
   SYSTEM_FIXED,
+  THRESHOLDS,
 } from "./qeconfig";
 import {
   fetchEffCutoffs,
@@ -28,7 +29,7 @@ import {
   resolveCutoffs,
 } from "./pseudo";
 
-const ACCURACY_OPTIONS = Object.entries(ACCURACY).map(([value, cfg]) => ({
+const PROTOCOL_OPTIONS = Object.entries(PROTOCOLS).map(([value, cfg]) => ({
   value,
   label: cfg.label,
 }));
@@ -75,7 +76,7 @@ function Select({ label, value, options, onChange }) {
 }
 
 export default function QEInputGenerator({ structure, className = "" }) {
-  const [accuracy, setAccuracy] = useState("medium");
+  const [protocol, setProtocol] = useState("balanced");
   const [functional, setFunctional] = useState("pbe");
   const [smearingKey, setSmearingKey] = useState("metallic");
 
@@ -176,7 +177,10 @@ export default function QEInputGenerator({ structure, className = "" }) {
     };
   }, [species]);
 
-  const tier = ACCURACY_PSEUDO_TIER[accuracy];
+  const protocolCfg = PROTOCOLS[protocol];
+  const tier = protocolCfg.pseudo;
+  const kp = KPOINTS[protocolCfg.kpoints];
+  const thr = THRESHOLDS[protocolCfg.thresholds];
 
   useEffect(() => {
     if (!species.length) return;
@@ -187,7 +191,7 @@ export default function QEInputGenerator({ structure, className = "" }) {
         const rec = recommendedPseudoName(
           pseudoMeta[symbol],
           functional,
-          accuracy,
+          tier,
         );
         if (rec && files.some((f) => f.name === rec)) next[symbol] = rec;
         else if (files.length > 0 && !next[symbol])
@@ -195,7 +199,7 @@ export default function QEInputGenerator({ structure, className = "" }) {
       }
       return next;
     });
-  }, [species, pseudoMeta, pseudoFiles, functional, accuracy]);
+  }, [species, pseudoMeta, pseudoFiles, functional, tier]);
 
   const effectiveCutoffs = useMemo(() => {
     if (!species.length) return { ecutwfc: 0, ecutrho: 0 };
@@ -220,7 +224,9 @@ export default function QEInputGenerator({ structure, className = "" }) {
 
   const pwText = useMemo(() => {
     if (!structure || !species.length) return "";
-    const acc = ACCURACY[accuracy];
+    const p = PROTOCOLS[protocol];
+    const kp = KPOINTS[p.kpoints];
+    const thr = THRESHOLDS[p.thresholds];
     const smearing = SMEARING[smearingKey];
     const pseudos = {};
     for (const symbol of species) {
@@ -231,8 +237,8 @@ export default function QEInputGenerator({ structure, className = "" }) {
         title: `qeinputgen-web ${FUNCTIONALS[functional].label}`,
         calculation: "scf",
         pseudo_dir: PSEUDO_DIR,
-        etot_conv_thr: acc.etot_conv_thr,
-        forc_conv_thr: acc.forc_conv_thr,
+        etot_conv_thr: thr.etot_conv_thr,
+        forc_conv_thr: thr.forc_conv_thr,
         ...CONTROL_FIXED,
       },
       system: {
@@ -244,12 +250,13 @@ export default function QEInputGenerator({ structure, className = "" }) {
         }),
         ...SYSTEM_FIXED,
         ...smearing.system,
+        ...(smearing.system.smearing && { degauss: kp.degauss }),
       },
       electrons: {
-        conv_thr: acc.conv_thr,
+        conv_thr: thr.conv_thr,
       },
       kpoints: {
-        kspacing: acc.kspacing,
+        kspacing: kp.kspacing,
       },
       pseudo: { pseudos },
     });
@@ -257,7 +264,7 @@ export default function QEInputGenerator({ structure, className = "" }) {
     structure,
     species,
     selections,
-    accuracy,
+    protocol,
     functional,
     smearingKey,
     effectiveCutoffs,
@@ -300,10 +307,8 @@ export default function QEInputGenerator({ structure, className = "" }) {
     }
   };
 
-  const acc = ACCURACY[accuracy];
-  // const lat = latticeParams(structure.lattice);
+  const tarballUrl = recommendedTarballUrl(functional, tier);
   const ntyp = species.length;
-  const tarballUrl = recommendedTarballUrl(functional, accuracy);
   const calcResults = symmetry?.calculationResults;
 
   return (
@@ -314,10 +319,10 @@ export default function QEInputGenerator({ structure, className = "" }) {
         </div>
         <div className="grid gap-4 p-4 sm:grid-cols-3">
           <Select
-            label="Accuracy"
-            value={accuracy}
-            options={ACCURACY_OPTIONS}
-            onChange={setAccuracy}
+            label="Protocol"
+            value={protocol}
+            options={PROTOCOL_OPTIONS}
+            onChange={setProtocol}
           />
           <Select
             label="Exchange-correlation functional"
@@ -333,7 +338,8 @@ export default function QEInputGenerator({ structure, className = "" }) {
           />
         </div>
         <div className="border-t border-slate-100 bg-slate-50/50 px-4 py-2 text-xs text-slate-500">
-          k-point spacing {acc.kspacing} Å⁻¹ · plane-wave cutoff{" "}
+          k-point spacing {kp.kspacing} Å⁻¹ · smearing {kp.degauss} Ry ·
+          plane-wave cutoff{" "}
           {effectiveCutoffs.ecutwfc > 0
             ? `${effectiveCutoffs.ecutwfc.toFixed(1)} Ry`
             : "—"}{" "}
@@ -341,8 +347,8 @@ export default function QEInputGenerator({ structure, className = "" }) {
           {effectiveCutoffs.ecutrho > 0
             ? `${effectiveCutoffs.ecutrho.toFixed(1)} Ry`
             : "—"}{" "}
-          · conv_thr {acc.conv_thr} · etot_conv_thr {acc.etot_conv_thr} ·
-          forc_conv_thr {acc.forc_conv_thr}
+          · conv_thr {thr.conv_thr} · etot_conv_thr {thr.etot_conv_thr} ·
+          forc_conv_thr {thr.forc_conv_thr}
         </div>
       </div>
 
@@ -369,7 +375,7 @@ export default function QEInputGenerator({ structure, className = "" }) {
               const rec = recommendedPseudoName(
                 pseudoMeta[symbol],
                 functional,
-                accuracy,
+                tier,
               );
               const co = resolveCutoffs(file, tier);
               const groups = groupPseudos(files);
