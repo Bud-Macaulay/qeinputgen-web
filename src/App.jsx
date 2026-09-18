@@ -29,7 +29,7 @@ function App() {
         ]}
       />
 
-      <main className="min-h-screen bg-slate-50 pb-10">
+      <main className="min-h-screen bg-[aliceblue] pb-10">
         <div className="mx-auto max-w-7xl px-4">
           <div className="overflow-hidden bg-white shadow-sm">
             <div className=" pt-4 sm:px-10">
