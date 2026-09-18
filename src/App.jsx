@@ -391,7 +391,11 @@ function App() {
                     <li>
                       More complex but standardized workflows are being
                       developed, exploiting the workflow engine of{" "}
-                      <a href="https://aiida.net" target="_blank" rel="noopener noreferrer">
+                      <a
+                        href="https://aiida.net"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         AiiDA
                       </a>
                       . The{" "}
@@ -405,7 +409,11 @@ function App() {
                       virtual machine that you can run on any computer (Windows,
                       Mac, Linux, etc...) provides an Ubuntu environment which
                       comes with Quantum ESPRESSO, AiiDA, and all the other{" "}
-                      <a href="https://max-centre.eu" target="_blank" rel="noopener noreferrer">
+                      <a
+                        href="https://max-centre.eu"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         MaX
                       </a>{" "}
                       codes preinstalled and ready to run. Additionally, the{" "}

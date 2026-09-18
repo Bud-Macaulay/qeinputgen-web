@@ -1,6 +1,5 @@
 allowBuilds:
-  esbuild: set this to true or false
+  esbuild: true
 minimumReleaseAgeExclude:
-  - matsci-parse@0.14.0
-overrides:
-  matsci-parse@0.14.0>matsci-parse: 0.14.0
+  - matsci-parse@0.14.2
+  - mc-react-header@0.7.2
