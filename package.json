@@ -24,7 +24,7 @@
     "lodash.debounce": "^4.0.8",
     "matsci-parse": "0.14.2",
     "mc-react-header": "^0.7.2",
-    "mc-react-library": "^0.6.4",
+    "mc-react-library": "^0.6.5",
     "mc-react-structure-visualizer": "^0.11.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
