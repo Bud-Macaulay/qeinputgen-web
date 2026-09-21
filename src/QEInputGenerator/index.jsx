@@ -8,7 +8,9 @@ import {
   toPW,
 } from "matsci-parse";
 
-import TextRenderer from "../components/TextRenderer";
+import { McCopyExtraAccordion } from "mc-react-library";
+import { DownloadIcon } from "../components/Icons";
+import { buildZip } from "./zip";
 import { formatSpaceGroupSymbol } from "../utils";
 import {
   CONTROL_FIXED,
@@ -93,6 +95,7 @@ export default function QEInputGenerator({ structure, className = "" }) {
   const [symmetryLoading, setSymmetryLoading] = useState(false);
   const [symmetryError, setSymmetryError] = useState(null);
   const [downloadingPseudo, setDownloadingPseudo] = useState(null);
+  const [zipping, setZipping] = useState(false);
 
   const species = useMemo(
     () => (structure ? getSpecies(structure).map((s) => s.symbol) : []),
@@ -311,6 +314,35 @@ export default function QEInputGenerator({ structure, className = "" }) {
     }
   };
 
+  const zipName = `qeinputgen-${formula || "input-set"}.zip`;
+
+  const handleDownloadZip = async (e) => {
+    e.stopPropagation();
+    if (zipping) return;
+    setZipping(true);
+    try {
+      const entries = [{ name: "PW.in", data: pwText }];
+      await Promise.allSettled(
+        zipFiles.map(async ({ name, url }) => {
+          const res = await fetch(url);
+          if (!res.ok) return;
+          entries.push({ name, data: new Uint8Array(await res.arrayBuffer()) });
+        }),
+      );
+      const blob = await buildZip(entries);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = zipName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } finally {
+      setZipping(false);
+    }
+  };
+
   const tarballUrl = recommendedTarballUrl(functional, tier);
   const ntyp = species.length;
   const calcResults = symmetry?.calculationResults;
@@ -517,12 +549,23 @@ export default function QEInputGenerator({ structure, className = "" }) {
         </div>
       </div>
 
-      <TextRenderer
+      <McCopyExtraAccordion
         title="Quantum ESPRESSO pw.x input"
         text={pwText}
         filename="PW.in"
-        zipFiles={zipFiles}
-        zipName={`qeinputgen-${formula || "input-set"}.zip`}
+        extraActions={
+          zipFiles?.length > 0 && (
+            <button
+              type="button"
+              onClick={handleDownloadZip}
+              disabled={zipping}
+              className="text-renderer__action disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <DownloadIcon className="text-renderer__action-icon" />
+              <span>{zipping ? "Zipping…" : "Input set (.zip)"}</span>
+            </button>
+          )
+        }
       />
     </div>
   );

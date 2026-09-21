@@ -4,7 +4,7 @@ import { fromJSON, toJSON } from "matsci-parse";
 import { parseFileText } from "./formats";
 import { examples } from "./examples";
 import MC3DInput from "./MC3D";
-import Modal from "../components/Modal";
+import { HashModal } from "mc-react-library";
 import {
   addHistoryEntry,
   clearHistory,
@@ -210,7 +210,7 @@ export default function CrystalStructureUpload({
         </a>
       </p>
 
-      <Modal hash="terms" title="Terms of service">
+      <HashModal hash="terms" title="Terms of service">
         <div className="space-y-2">
           <h3 className="font-semibold">Links To Other Web Sites</h3>
           <p>
@@ -239,7 +239,7 @@ export default function CrystalStructureUpload({
           <h3 className="font-semibold">Contact Us</h3>
           <p>If you have any questions about these Terms, please contact us.</p>
         </div>
-      </Modal>
+      </HashModal>
 
       {parsing && (
         <p className="mt-3 flex items-center gap-2 text-sm text-slate-600">

@@ -5,7 +5,7 @@ import { useState } from "react";
 import CrystalUpload from "./FileUpload";
 import QEInputGenerator from "./QEInputGenerator";
 
-import Accordion from "./components/Accordion";
+import { McInfoAccordion } from "mc-react-library";
 
 function App() {
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -43,7 +43,7 @@ function App() {
             <div className="mx-auto max-w-6xl px-6 py-8 sm:px-10">
               <div className="space-y-3">
                 {/* First Accordion */}
-                <Accordion
+                <McInfoAccordion
                   title="What this tool does"
                   open={openAccordion === 0}
                   onToggle={() =>
@@ -84,10 +84,10 @@ function App() {
                     disclose them to anyone - ourselves or third parties. More
                     details can be found in the Terms of Use.
                   </p>
-                </Accordion>
+                </McInfoAccordion>
 
                 {/* Second accordion content */}
-                <Accordion
+                <McInfoAccordion
                   title="Instructions and details"
                   open={openAccordion === 1}
                   onToggle={() =>
@@ -428,7 +428,7 @@ function App() {
                       can be used to run standard Quantum ESPRESSO workflows.
                     </li>
                   </ul>
-                </Accordion>
+                </McInfoAccordion>
                 <CrystalUpload onStructureParsed={handleStructureParsed} />
               </div>
             </div>
