@@ -7,11 +7,10 @@ import {
   HashModal,
   McDropzone,
   McHistoryList,
+  RemoteStructureLoader,
+  shortHashForUrl,
   createHistoryStore,
 } from "mc-react-library";
-import RemoteStructureLoader, {
-  shortHashForUrl,
-} from "../lib/RemoteStructureLoader.jsx";
 
 const historyStore = createHistoryStore("qeinputgen.parsedStructures");
 
