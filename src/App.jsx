@@ -34,7 +34,9 @@ function App() {
         <div className="mx-auto max-w-7xl px-4">
           <div className="overflow-hidden bg-white p-4 shadow-sm">
             <McAppHeader
-              title="QE input generator"
+              title="Quantum ESPRESSO input generator and structure visualizer"
+              logo={`${import.meta.env.BASE_URL}qe-logo.png`}
+              logoAlt="Quantum ESPRESSO input generator logo"
             />
 
             <div className="mx-auto max-w-4xl px-6 py-8 sm:px-10">
