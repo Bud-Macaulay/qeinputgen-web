@@ -12,14 +12,13 @@ import { McCopyExtraAccordion } from "mc-react-library";
 import { DownloadIcon } from "../components/Icons";
 import { buildZip } from "./zip";
 import { formatSpaceGroupSymbol } from "../utils";
+import { pwOptions } from "./pwOptions";
 import {
-  CONTROL_FIXED,
   FUNCTIONALS,
   KPOINTS,
   PSEUDO_DIR,
   PROTOCOLS,
   SMEARING,
-  SYSTEM_FIXED,
   THRESHOLDS,
 } from "./qeconfig";
 import {
@@ -231,42 +230,20 @@ export default function QEInputGenerator({ structure, className = "" }) {
 
   const pwText = useMemo(() => {
     if (!structure || !species.length) return "";
-    const p = PROTOCOLS[protocol];
-    const kp = KPOINTS[p.kpoints];
-    const thr = THRESHOLDS[p.thresholds];
-    const smearing = SMEARING[smearingKey];
     const pseudos = {};
     for (const symbol of species) {
       pseudos[symbol] = selections[symbol] || `${symbol}.UPF`;
     }
-    return toPW(structure, {
-      control: {
-        title: `qeinputgen-web ${FUNCTIONALS[functional].label}`,
-        calculation: "scf",
-        pseudo_dir: PSEUDO_DIR,
-        etot_conv_thr: thr.etot_conv_thr,
-        forc_conv_thr: thr.forc_conv_thr,
-        ...CONTROL_FIXED,
-      },
-      system: {
-        ...(effectiveCutoffs.ecutwfc > 0 && {
-          ecutwfc: parseFloat(effectiveCutoffs.ecutwfc.toFixed(1)),
-        }),
-        ...(effectiveCutoffs.ecutrho > 0 && {
-          ecutrho: parseFloat(effectiveCutoffs.ecutrho.toFixed(1)),
-        }),
-        ...SYSTEM_FIXED,
-        ...smearing.system,
-        ...(smearing.system.smearing && { degauss: kp.degauss }),
-      },
-      electrons: {
-        conv_thr: thr.conv_thr,
-      },
-      kpoints: {
-        kspacing: kp.kspacing,
-      },
-      pseudo: { pseudos },
-    });
+    return toPW(
+      structure,
+      pwOptions(structure, {
+        protocol,
+        functional,
+        smearing: smearingKey,
+        cutoffs: effectiveCutoffs,
+        pseudos,
+      }),
+    );
   }, [
     structure,
     species,
@@ -383,8 +360,9 @@ export default function QEInputGenerator({ structure, className = "" }) {
           {effectiveCutoffs.ecutrho > 0
             ? `${effectiveCutoffs.ecutrho.toFixed(1)} Ry`
             : "—"}{" "}
-          · conv_thr {thr.conv_thr} · etot_conv_thr {thr.etot_conv_thr} ·
-          forc_conv_thr {thr.forc_conv_thr}
+          · conv_thr {thr.conv_thr} Ry/atom · etot_conv_thr{" "}
+          {thr.etot_conv_thr} Ry/atom · forc_conv_thr {thr.forc_conv_thr}{" "}
+          Ry/bohr
         </div>
       </div>
 
