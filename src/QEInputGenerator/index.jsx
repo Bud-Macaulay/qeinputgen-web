@@ -8,7 +8,7 @@ import {
   toPW,
 } from "matsci-parse";
 
-import { McCopyExtraAccordion } from "mc-react-library";
+import { McCopyExtraAccordion, McloudSpinner, McResults } from "mc-react-library";
 import { DownloadIcon } from "../components/Icons";
 import { buildZip } from "./zip";
 import { formatSpaceGroupSymbol } from "../utils";
@@ -324,8 +324,14 @@ export default function QEInputGenerator({ structure, className = "" }) {
   const ntyp = species.length;
   const calcResults = symmetry?.calculationResults;
 
+  // A new structure scrolls the generator into view; while its pseudopotentials
+  // load, the height of the previous ones is kept (no jump up)
   return (
-    <div className={`space-y-3 ${className}`}>
+    <McResults
+      busy={pseudoLoading}
+      resultKey={structure}
+      className={`space-y-3 ${className}`}
+    >
       <div className="overflow-hidden rounded-lg border border-slate-200">
         <div className="border-b border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">
           Calculation parameters
@@ -371,7 +377,8 @@ export default function QEInputGenerator({ structure, className = "" }) {
           Pseudopotentials (SSSP v2.0, {tier} tier)
         </div>
         {pseudoLoading && (
-          <div className="flex h-24 items-center justify-center text-sm text-slate-500">
+          <div className="flex h-24 items-center justify-center gap-2 text-sm text-slate-500">
+            <McloudSpinner className="w-8 shrink-0" />
             Loading SSSP metadata…
           </div>
         )}
@@ -496,7 +503,10 @@ export default function QEInputGenerator({ structure, className = "" }) {
         <div className="p-4 ">
           <div className="mb-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-slate-600">
             {symmetryLoading && (
-              <span className="text-slate-400">Determining symmetry…</span>
+              <div className="flex items-center gap-1 text-slate-400">
+                <McloudSpinner className="w-5 shrink-0" />
+                Determining symmetry…
+              </div>
             )}
             {symmetryError && (
               <span className="text-red-600">Symmetry analysis failed</span>
@@ -545,6 +555,6 @@ export default function QEInputGenerator({ structure, className = "" }) {
           )
         }
       />
-    </div>
+    </McResults>
   );
 }
